@@ -184,8 +184,17 @@ class FloatingOrb {
         this.updatePosition(sinOffset);
     }
 
+    // Hàm này chịu trách nhiệm vẽ (render) lại vị trí thực tế của quả cầu lên màn hình (DOM) dựa trên tọa độ (X, Y) và hiệu ứng nhấp nhô sóng Sin (sinOffset)
     updatePosition(sinOffset = 0) {
-        this.element.style.transform = `translate3d(${this.x}px, ${this.y + sinOffset}px, 0)`;
+        // Tại sao dùng translate3d(...) mà không dùng top/left? Dùng translate3d giúp trình duyệt kích hoạt tăng tốc phần cứng GPU. Khi quả cầu di chuyển liên tục 60fps/120fps,
+        // GPU sẽ xử lý cực mượt mà không gây giật lag hay bắt trình duyệt phải tính toán lại bố cục toàn trang
+
+        // transform thay đổi vị trí hiển thị của element mà không làm thay đổi layout của document, nên phù hợp cho animation/movement liên tục
+
+        // Nếu sinOffset là một số hữu hạn (kể cả số âm), giữ nguyên giá trị.
+        // Nếu không phải số hữu hạn như null, undefined, NaN, Infinity... thì dùng 0
+        const validOffset = Number.isFinite(sinOffset) ? sinOffset : 0;
+        this.element.style.transform = `translate3d(${this.x}px, ${this.y + validOffset}px, 0)`;
     }
 
     popExplode() {

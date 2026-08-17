@@ -211,10 +211,31 @@ class FloatingOrb {
     }
 }
 
+// Khởi tạo (hoặc reset làm mới) toàn bộ các quả cầu lơ lửng trên trang web
 function initFloatingOrbs() {
+    if (!floatingArea) {
+        console.error("Lỗi: Không tìm thấy phần tử #floating-area trong DOM!");
+        return;
+    }
+
+    if (!Array.isArray(memoriesData) || memoriesData.length === 0) {
+        console.warn("Lỗi: memoriesData không hợp lệ hoặc bị rỗng!");
+        floatingArea.innerHTML = '';
+        floatingOrbs = [];
+        collectedCount = 0;
+        updateTrackerUI();
+        return;
+    }
+
+
+    // Tránh việc khi khởi tạo lại (hoặc gọi lại hàm này), các quả cầu cũ vẫn còn trên màn hình bị đè thêm quả cầu mới
     floatingArea.innerHTML = '';
-    floatingOrbs = memoriesData.map((data, index) => new FloatingOrb(data, index));
+
+    floatingOrbs = memoriesData?.filter(data => data && typeof data === 'object').map((data, index) => new FloatingOrb(data, index));
+
+    // Reset bộ đếm số quả cầu đã thu thập
     collectedCount = 0;
+    // Gọi updateTrackerUI() để cập nhật con số 0 này lên giao diện hiển thị người dùng
     updateTrackerUI();
 }
 

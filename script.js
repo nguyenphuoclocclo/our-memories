@@ -74,45 +74,87 @@ let collectedCount = 0;
 let activeMemoryIndex = null;
 const floatingArea = document.getElementById('floating-area');
 
+// Class này chịu tránh nhiệm sinh ra một quả cầu kỷ niệm lơ lửng trên màn hình
 class FloatingOrb {
+    // data: Chứa thông tin kỷ niệm
+    // index: Thứ tự của quả cầu này trong danh sách
     constructor(data, index) {
         this.data = data;
         this.index = index;
+
         this.element = document.createElement('div');
         this.element.className = 'floating-orb';
+
+        // Chèn nội dung HTML vào trong quả cầu
+        // Example:
+        // <div class="floating-orb">
+        // <div class="orb-inner">🎈 Sinh nhật 20 tuổi</div>
+        // </div>
         this.element.innerHTML = `<div class="orb-inner">${data.icon} ${data.label}</div>`;
 
         // Vị trí xuất phát ngẫu nhiên
-        const padding = 60;
-        const headerOffset = 220; // Tránh đè lên phần header
+        const padding = 60; // Lùi vào 60px từ các mép màn hình (để quả cầu không bị mép màn hình che mất)
+        const headerOffset = 220; // Chừa lại 220px tính từ đỉnh màn hình xuống (tránh việc quả cầu xuất hiện đè lên thanh Tiêu đề / Header của trang web)
+
+        // Kích thước ước tính của quả cầu (rộng 180px, cao 45px)
         this.width = 180;
         this.height = 45;
 
+        // - Giả sử màn hình máy tính rộng window.innerWidth = 1000px
+        // - Vùng chiều rộng an toàn còn lại = 1000 - 180 - (60*2) = 700
+        // - Math.random() trả về 1 số ngẫu nhiên từ 0.0 đến 1.0 (ví dụ: 0.5)
+        // - Tọa độ X = 60 + (0.5 * 700) = 410
+        // => Kết quả: Quả cầu xuất hiện ở vị trí X = 410px (rất an toàn, không bị chèn ra ngoài lề trái hay lề phải)
         this.x = padding + Math.random() * Math.max(50, (window.innerWidth - this.width - padding * 2));
+
+        // - Giả sử chiều cao màn hình window.innerHeight = 800px
+        // - Vùng chiều cao an toàn còn lại = 800 - 220 - 45 - 60 = 475
+        // - Math.random() trả về 1 số ngẫu nhiên từ 0.0 đến 1.0 (ví dụ: 0.2)
+        // - Tọa độ Y = 220 + 0.2 * 475 = 315
+        // => Kết quả: Quả cầu nằm ở vị trí Y = 315px (nằm bên dưới Header 220px và không bị lọt xuống dưới cùng)
         this.y = headerOffset + Math.random() * Math.max(50, (window.innerHeight - headerOffset - this.height - padding));
 
-        // Vận tốc di chuyển nhẹ nhàng
+        // Tạo vận tốc di chuyển & Pha dao động lơ lửng
+        // Math.random() trả về từ 0.0 đến 1.0
+        // Trừ 0.5 giúp giá trị thành từ -0.5 đến +0.5 (âm nghĩa là trôi sang trái/lên trên, dương là trôi sang phải/xuống dưới)
+        // Nhân 1.5 để tăng dải tốc độ lên khoảng [-0.75px, +0.75px] mỗi khung hình
         this.vx = (Math.random() - 0.5) * 1.5;
         this.vy = (Math.random() - 0.5) * 1.5;
+
+        // + Xử lý trường hợp vận tốc quá chậm
+        // - Tại sao cần đoạn này? Nếu Math.random() vô tình sinh ra vx = 0.01, quả cầu sẽ đứng gần như bất động
+        // - Đoạn code kiểm tra nếu độ lớn tốc độ < 0.4, nó sẽ ép tốc độ tối thiểu lên 0.5 (hoặc -0.5 tùy ngẫu nhiên). Nhờ vậy quả cầu nào cũng trôi động nhẹ nhàng chứ không bị "băng hà" đứng yên
         if (Math.abs(this.vx) < 0.4) this.vx = 0.5 * (Math.random() > 0.5 ? 1 : -1);
         if (Math.abs(this.vy) < 0.4) this.vy = 0.5 * (Math.random() > 0.5 ? 1 : -1);
 
+        // Tạo một góc pha (phase) ngẫu nhiên từ 0 đến 2π (0 đến 360 độ). Góc này dùng cho hàm nhấp nhô hình Sin (Math.sin), giúp các quả cầu không bị lắc bồng bềnh cùng một lúc mà mỗi quả có nhịp sóng riêng biệt
         this.phase = Math.random() * Math.PI * 2;
+
+        // Đã được thu thập/người dùng click xem chưa ?
         this.isCollected = false;
+
+        // Người dùng có đang rê chuột lên nó không ?
         this.isHovered = false;
 
-        // Tạm dừng di chuyển khi rê chuột/chạm vào để không bị giật và dễ click
+        // Lắng nghe khi người dùng rê chuột vào (mouseenter), rê chuột ra (mouseleave) hoặc chạm ngón tay vào màn hình (touchstart)
+        // Trong vòng lặp chạy hàm update(), nếu isHovered === true thì quả cầu sẽ đứng yên tạm thời, giúp người dùng dễ dàng bấm vào mà không bị tình trạng đang bấm thì quả cầu trôi mất tay
         this.element.addEventListener('mouseenter', () => { this.isHovered = true; });
         this.element.addEventListener('mouseleave', () => { this.isHovered = false; });
         this.element.addEventListener('touchstart', () => { this.isHovered = true; }, { passive: true });
 
-        // Gán sự kiện click
+        // Bắt sự kiện khi người dùng click vào quả cầu:
         this.element.addEventListener('click', (e) => {
             e.stopPropagation();
-            openMemoryModal(this.index);
+            if (this.index !== null && this.index !== undefined) {
+                // Gọi hàm mở hộp thoại Pop-up (modal) để hiển thị chi tiết bức ảnh/kỷ niệm của quả cầu thứ this.index
+                openMemoryModal(this.index);
+            }
         });
 
+        // Chính thức chèn thẻ <div> quả cầu vào khung chứa floatingArea trên giao diện HTML thật. Bây giờ quả cầu đã xuất hiện trên màn hình
         floatingArea.appendChild(this.element);
+
+        // Gọi ngay hàm vẽ vị trí để áp dụng tọa độ (X, Y) vừa tính ở trên lên thuộc tính CSS transform: translate3d(x, y, 0) giúp quả cầu nhảy ngay tới vị trí cần đứng
         this.updatePosition();
     }
 

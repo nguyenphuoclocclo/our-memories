@@ -273,20 +273,60 @@ function updateTrackerUI() {
             progressFillEl.style.width = `${pct}%`;
         }
     } catch (error) {
-        console.error("Lỗi khi cập nhật Tracker UI:", error);
+        console.error("Error Function updateTrackerUI: ", error);
     }
 }
 
 // ==========================================
 // 4. XỬ LÝ MODAL & THU THẬP KÝ ỨC
 // ==========================================
+// Hàm mở Modal xem nội dung chi tiết mảnh ký ức
 function openMemoryModal(index) {
-    activeMemoryIndex = index;
-    const data = memoriesData[index];
-    document.getElementById('modalTitle').innerText = data.title;
-    document.getElementById('modalImg').src = data.img;
-    document.getElementById('modalText').innerText = data.text;
-    document.getElementById('memoryModal').classList.add('active');
+    try {
+        // Kiểm tra mảng dữ liệu memoriesData có hợp lệ không
+        if (!Array.isArray(memoriesData) || memoriesData.length === 0) {
+            console.warn("Lỗi openMemoryModal: mảng memoriesData không hợp lệ hoặc rỗng.");
+            return;
+        }
+
+        // Kiểm tra index hợp lệ (phải là số nguyên nằm trong khoảng [0, memoriesData.length - 1])
+        const safeIndex = Number(index);
+        if (isNaN(safeIndex) || safeIndex < 0 || safeIndex >= memoriesData.length) {
+            console.warn(`Lỗi openMemoryModal: index (${index}) nằm ngoài phạm vi mảng dữ liệu.`);
+            return;
+        }
+
+        // Kiểm tra đối tượng dữ liệu tại vị trí safeIndex
+        const data = memoriesData[safeIndex];
+        if (!data || typeof data !== 'object') {
+            console.warn(`Lỗi openMemoryModal: Dữ liệu ký ức tại index ${safeIndex} không tồn tại.`);
+            return;
+        }
+
+        // Lấy các phần tử DOM và kiểm tra phần tử khung Modal chính
+        const modalTitleEl = document.getElementById('modalTitle');
+        const modalImgEl = document.getElementById('modalImg');
+        const modalTextEl = document.getElementById('modalText');
+        const memoryModalEl = document.getElementById('memoryModal');
+
+        if (!memoryModalEl) {
+            console.error("Lỗi openMemoryModal: Không tìm thấy phần tử DOM #memoryModal.");
+            return;
+        }
+
+        if (modalTitleEl) modalTitleEl.innerText = data.title || '';
+        if (modalImgEl) modalImgEl.src = data.img || '';
+        if (modalTextEl) modalTextEl.innerText = data.text || '';
+
+        // Cập nhật chỉ số ký ức đang xem để hàm closeMemoryModal xử lý nổ quả cầu
+        activeMemoryIndex = safeIndex;
+
+        // Hiển thị Modal lên màn hình
+        memoryModalEl.classList.add('active');
+
+    } catch (error) {
+        console.error("Error Function openMemoryModal: ", error);
+    }
 }
 
 function closeMemoryModal() {

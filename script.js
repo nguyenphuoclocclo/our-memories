@@ -244,11 +244,37 @@ function animateOrbs() {
     requestAnimationFrame(animateOrbs);
 }
 
+// Hàm này là cập nhật con số và thanh phần trăm tiến độ thu thập ký ức hiển thị trên giao diện người dùng (UI)
 function updateTrackerUI() {
-    document.getElementById('collectedCount').innerText = collectedCount;
-    document.getElementById('totalCount').innerText = memoriesData.length;
-    const pct = (collectedCount / memoriesData.length) * 100;
-    document.getElementById('progressFill').style.width = pct + '%';
+    try {
+        const collectedCountEl = document.getElementById('collectedCount');
+        const totalCountEl = document.getElementById('totalCount');
+        const progressFillEl = document.getElementById('progressFill');
+
+        // Kiểm tra memoriesData có hợp lệ không, tránh lỗi .length trên null/undefined
+        const total = (Array.isArray(memoriesData) && memoriesData.length > 0) ? memoriesData.length : 0;
+
+        // Đảm bảo collectedCount là số hợp lệ, không bị NaN hay âm
+        const safeCollected = Math.max(0, Number(collectedCount) || 0);
+
+        // Cập nhật text giao diện nếu phần tử DOM tồn tại
+        if (collectedCountEl) collectedCountEl.innerText = safeCollected;
+        if (totalCountEl) totalCountEl.innerText = total;
+
+        // Tính phần trăm an toàn, chống chia cho 0 (Infinity) và clamp trong khoảng [0, 100]
+        let pct = 0;
+        if (total > 0) {
+            const rawPct = (safeCollected / total) * 100;
+            pct = Math.min(100, Math.max(0, rawPct));
+        }
+
+        // Cập nhật độ rộng cho thanh tiến độ
+        if (progressFillEl) {
+            progressFillEl.style.width = `${pct}%`;
+        }
+    } catch (error) {
+        console.error("Lỗi khi cập nhật Tracker UI:", error);
+    }
 }
 
 // ==========================================

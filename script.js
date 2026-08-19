@@ -329,27 +329,62 @@ function openMemoryModal(index) {
     }
 }
 
-function closeMemoryModal() {
-    document.getElementById('memoryModal').classList.remove('active');
+// Quản lý timer chuyển stage an toàn với clearTimeout
+let stageTransitionTimer = null;
 
-    if (activeMemoryIndex !== null && floatingOrbs[activeMemoryIndex] && !floatingOrbs[activeMemoryIndex].isCollected) {
-        const orb = floatingOrbs[activeMemoryIndex];
-        orb.popExplode();
-        collectedCount++;
-        updateTrackerUI();
-
-        // Nếu đã thu thập hết 5/5
-        if (collectedCount >= memoriesData.length) {
-            setTimeout(() => {
-                showToast("✨ Tuyệt vời! Bạn đã mở khóa tất cả các mảnh ký ức! ✨");
-                createConfetti();
-                setTimeout(() => {
-                    goToStage(2);
-                }, 1800);
-            }, 500);
-        }
+function cancelStageTransition() {
+    if (stageTransitionTimer !== null) {
+        clearTimeout(stageTransitionTimer);
+        stageTransitionTimer = null;
     }
-    activeMemoryIndex = null;
+}
+
+// Hàm đóng Modal xem nội dung chi tiết mảnh ký ức
+function closeMemoryModal() {
+    try {
+        const memoryModalEl = document.getElementById('memoryModal');
+        if (memoryModalEl) {
+            memoryModalEl.classList.remove('active');
+        } else {
+            console.error("Lỗi closeMemoryModal: Không tìm thấy phần tử DOM #memoryModal.");
+        }
+
+        // Lưu chỉ số hiện tại và reset activeMemoryIndex ngay để chống click trùng / gọi hàm lặp lại
+        const currentIndex = activeMemoryIndex;
+        activeMemoryIndex = null;
+
+        // Kiểm tra index hợp lệ và thuộc phạm vi mảng floatingOrbs
+        if (currentIndex === null || currentIndex < 0 || currentIndex >= floatingOrbs.length) {
+            return;
+        }
+
+        const orb = floatingOrbs[currentIndex];
+        // Chỉ xử lý nếu quả cầu tồn tại và chưa được thu thập
+        if (orb && !orb.isCollected) {
+            orb.popExplode?.();
+            collectedCount++;
+            updateTrackerUI();
+
+            // Nếu đã thu thập hết tất cả mảnh ký ức
+            if (collectedCount >= memoriesData.length) {
+                // Hủy bất kỳ timer nào đang chạy dở dở trước đó
+                cancelStageTransition();
+
+                stageTransitionTimer = setTimeout(() => {
+                    showToast("✨ Tuyệt vời! Bạn đã mở khóa tất cả các mảnh ký ức! ✨");
+                    createConfetti();
+
+                    stageTransitionTimer = setTimeout(() => {
+                        goToStage(2);
+                        stageTransitionTimer = null;
+                    }, 1800);
+                }, 500);
+            }
+        }
+    } catch (error) {
+        console.error("Error Function closeMemoryModal: ", error);
+        activeMemoryIndex = null;
+    }
 }
 
 // ==========================================
@@ -441,6 +476,9 @@ function createSmokePuff(svgX, svgY) {
 // 7. GIAI ĐOẠN 3 & CHUYỂN STAGE
 // ==========================================
 function goToStage(stageNum) {
+    // Hủy các timer chuyển stage đang đếm ngược ngầm nếu người dùng chủ động chuyển stage
+    cancelStageTransition();
+
     document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
     document.getElementById(`stage-${stageNum}`).classList.add('active');
 

@@ -11,6 +11,19 @@ const modalTextEl = document.getElementById('modalText');
 // ==========================================
 // COMMON FUNCTION
 function withTryCatch(fn, onError = undefined, shouldThrowError = false) {
+    // Tại sao phải return function ? Vì nếu chúng ta viết như đoạn code dưới đây thì Function sẽ chạy ngay lập tức
+    //     function withTryCatch(fn) {
+    //      try {
+    //         return fn();
+    //      } catch (error) {
+    //         ...
+    //      }
+    // }
+
+    // const safeUpdate = withTryCatch(updatePosition);
+    // => updatePosition() sẽ chạy ngay tại dòng này. Đây không phải điều chúng ta muốn. Chúng ta muốn
+    // const safeUpdate = withTryCatch(updatePosition);
+    // Hàm safeUpdate chỉ được chạy khi và chỉ khi có đoạn nào đó gọi đến nó: safeUpdate();. Vì vậy phải return một function
     return function (...args) {
         try {
             return fn.apply(this, args);
@@ -109,7 +122,7 @@ function updateTimer() {
     document.getElementById('hours').innerText = hours < 10 ? '0' + hours : hours;
     document.getElementById('minutes').innerText = minutes < 10 ? '0' + minutes : minutes;
     document.getElementById('seconds').innerText = seconds < 10 ? '0' + seconds : seconds;
-}
+};
 setInterval(updateTimer, 1000);
 updateTimer();
 
@@ -385,7 +398,7 @@ const openMemoryModal = withTryCatch(
         const data = memoriesData[safeIndex];
         if (!data || typeof data !== 'object') return;
 
-        updateModalContent(data)
+        updateModalContent(data);
 
         // Cập nhật chỉ số ký ức đang xem để hàm closeMemoryModal xử lý nổ quả cầu
         activeMemoryIndex = safeIndex;
@@ -408,7 +421,7 @@ function cancelStageTransition() {
 // Hàm đóng Modal xem nội dung chi tiết mảnh ký ức
 const closeMemoryModal = withTryCatch(
     function closeMemoryModal() {
-        updateModalContent(null, { action: 'remove' })
+        updateModalContent(null, { action: 'remove' });
 
         // Lưu chỉ số hiện tại và reset activeMemoryIndex ngay để chống click trùng / gọi hàm lặp lại
         const currentIndex = activeMemoryIndex;
@@ -441,7 +454,7 @@ const closeMemoryModal = withTryCatch(
         }
     },
     () => { activeMemoryIndex = null; }
-)
+);
 
 // ==========================================
 // 5. TRỨNG PHỤC SINH: BẤM 5 LẦN TRÁI TIM

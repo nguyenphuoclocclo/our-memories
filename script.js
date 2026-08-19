@@ -685,9 +685,24 @@ class Particle {
     }
 }
 
+// Hàm này có nhiệm vụ tạo ra một hiệu ứng bùng nổ hạt (Particle Burst / Explosion Effect) tại một vị trí tọa độ (x, y) xác định trên màn hình (HTML5 Canvas)
+// Mỗi khi hàm này được gọi (ví dụ: khi người dùng nhấp chuột, hoàn thành nhiệm vụ, mở hiệu ứng chúc mừng...), nó sẽ sinh ra một loạt các hạt nhỏ với màu sắc ngẫu nhiên và thêm chúng vào mảng quản lý hạt particles
 function createBurstParticles(x, y, count = 20, colors = ['#ff4b8b', '#ffd700', '#ffffff']) {
-    for (let i = 0; i < count; i++) {
+    // count: Số lượng hạt sẽ được tạo ra
+
+    if (!Array.isArray(particles)) return;
+
+    if (typeof x !== 'number' || typeof y !== 'number' || Number.isNaN(x) || Number.isNaN(y)) return;
+
+    if (isInvalidArray(colors)) return;
+
+    // GIỚI HẠN TỐI ĐA (vd: tối đa 100 hạt/lần) để tránh lag
+    const safeCount = Math.min(Math.max(0, Math.floor(count) || 0), 100);
+    if (safeCount <= 0) return;
+
+    for (let i = 0; i < safeCount; i++) {
         const color = colors[Math.floor(Math.random() * colors.length)];
+        // Mỗi hạt khi khởi tạo sẽ tự gán cho mình một vận tốc ngẫu nhiên vx (ngang) và vy (dọc) để khi vẽ ra, các hạt sẽ bay tỏa ra mọi hướng tạo thành hiệu ứng "bùng nổ" (burst)
         particles.push(new Particle(x, y, color));
     }
 }

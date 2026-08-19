@@ -303,14 +303,35 @@ class FloatingOrb {
         this.element.style.transform = `translate3d(${this.x}px, ${this.y + validOffset}px, 0)`;
     }
 
+    // Hàm này xử lý hiệu ứng quả cầu nổ tung (pháo hoa hạt, phóng to, mờ dần) và tự xóa khỏi giao diện (DOM) khi được thu thập
     popExplode() {
+        // Nếu quả cầu đã bị nổ/thu thập trước đó hoặc phần tử không tồn tại thì không thực thi gì cả
+        if (this.isCollected || !this.element) return;
+
+        // Đánh dấu đã thu thập ngay lập tức để chặn các cuộc gọi lặp lại
         this.isCollected = true;
-        createBurstParticles(this.x + 80, this.y + 20, 25, ['#ff4b8b', '#ff7eb3', '#ffd700', '#ffffff']);
+
+        // Chặn tương tác chuột ngay lập tức trong 0.4s diễn ra hiệu ứng nổ
+        this.element.style.pointerEvents = 'none';
+
+        // Tạo hiệu ứng hạt nổ
+        createBurstParticles?.(this.x + 80, this.y + 20, 25, ['#ff4b8b', '#ff7eb3', '#ffd700', '#ffffff']);
+
+        // Thiết lập hiệu ứng CSS biến mất mượt mà
         this.element.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
-        this.element.style.transform += ' scale(1.6)';
+
+        // Đảm bảo không bị nối scale(1.6) trùng lặp nhiều lần
+        if (!this.element.style.transform.includes('scale')) {
+            this.element.style.transform += ' scale(1.6)';
+        }
         this.element.style.opacity = '0';
+
+        // Xóa khỏi DOM sau khi hiệu ứng 0.4s kết thúc
         setTimeout(() => {
-            if (this.element.parentNode) {
+            if (this.element && typeof this.element.remove === 'function') {
+                this.element.remove();
+            }
+            else if (this.element.parentNode) {
                 this.element.parentNode.removeChild(this.element);
             }
         }, 400);

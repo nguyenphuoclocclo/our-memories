@@ -3,6 +3,99 @@
 // ==========================================
 const startDate = new Date(2023, 1, 14, 0, 0, 0);
 
+const memoryModalEl = document.getElementById('memoryModal');
+const modalTitleEl = document.getElementById('modalTitle');
+const modalImgEl = document.getElementById('modalImg');
+const modalTextEl = document.getElementById('modalText');
+
+// ==========================================
+// COMMON FUNCTION
+function withTryCatch(fn, onError = undefined, shouldThrowError = false) {
+    return function (...args) {
+        try {
+            return fn.apply(this, args);
+        } catch (error) {
+            if (typeof onError === "function") {
+                onError(error, args);
+            }
+
+            console.error(`❌ Error In Function [${fn.name || 'Anonymous'}]:`, error);
+
+            if (shouldThrowError) throw error;
+        }
+    };
+}
+
+
+function isInvalidArray(targetArray, onInvalid, checkEmpty = true) {
+    const isInvalid = !Array.isArray(targetArray) || (checkEmpty && targetArray.length === 0);
+
+    if (isInvalid) {
+        if (typeof onInvalid === 'function') {
+            onInvalid(targetArray);
+        } else {
+            console.warn(`Lỗi: Mảng ${targetArray} không hợp lệ hoặc bị rỗng.`);
+        }
+    }
+
+    return isInvalid;
+}
+
+function isInvalidIndexInArray(index, arrayLength, onInvalid) {
+    const isInvalidType =
+        index === null ||
+        index === undefined ||
+        typeof index === 'boolean' ||
+        (typeof index === 'string' && index.trim() === '');
+
+    const safeIndex = Number(index);
+
+    const isInvalid =
+        isInvalidType ||
+        !Number.isInteger(safeIndex) ||
+        isNaN(arrayLength) ||
+        safeIndex < 0 ||
+        safeIndex >= arrayLength;
+
+    if (isInvalid) {
+        if (typeof onInvalid === 'function') {
+            onInvalid(index, safeIndex);
+        } else {
+            console.warn(`Lỗi: Index (${index}) không hợp lệ.`);
+        }
+    }
+
+    return isInvalid;
+}
+
+function updateModalContent(data = null, options = {}) {
+    if (!memoryModalEl) {
+        console.error("Lỗi: Không tìm thấy phần tử DOM #memoryModal");
+        return;
+    }
+
+    if (data && typeof data === 'object') {
+        const { title = '', img = '', text = '' } = data ?? {};
+        if (modalTitleEl) modalTitleEl.innerText = title;
+        if (modalImgEl) modalImgEl.src = img;
+        if (modalTextEl) modalTextEl.innerText = text;
+    }
+
+    const { className = 'active', action = null, active = null } = options;
+    if (typeof active !== 'boolean' && !action) return;
+
+    if (typeof active === 'boolean') {
+        memoryModalEl.classList.toggle(className, active);
+    } else if (action === 'add') {
+        memoryModalEl.classList.add(className);
+    } else if (action === 'remove') {
+        memoryModalEl.classList.remove(className);
+    } else if (action === 'toggle') {
+        memoryModalEl.classList.toggle(className);
+    }
+}
+// ==========================================
+
 function updateTimer() {
     const now = new Date();
     const diff = now - startDate;
@@ -218,12 +311,15 @@ function initFloatingOrbs() {
         return;
     }
 
-    if (!Array.isArray(memoriesData) || memoriesData.length === 0) {
-        console.warn("Lỗi: memoriesData không hợp lệ hoặc bị rỗng!");
-        floatingArea.innerHTML = '';
-        floatingOrbs = [];
-        collectedCount = 0;
-        updateTrackerUI();
+    if (isInvalidArray(
+        memoriesData,
+        () => {
+            floatingArea.innerHTML = '';
+            floatingOrbs = [];
+            collectedCount = 0;
+            updateTrackerUI();
+        }
+    )) {
         return;
     }
 
@@ -245,8 +341,8 @@ function animateOrbs() {
 }
 
 // Hàm này là cập nhật con số và thanh phần trăm tiến độ thu thập ký ức hiển thị trên giao diện người dùng (UI)
-function updateTrackerUI() {
-    try {
+const updateTrackerUI = withTryCatch(
+    function updateTrackerUI() {
         const collectedCountEl = document.getElementById('collectedCount');
         const totalCountEl = document.getElementById('totalCount');
         const progressFillEl = document.getElementById('progressFill');
@@ -272,62 +368,32 @@ function updateTrackerUI() {
         if (progressFillEl) {
             progressFillEl.style.width = `${pct}%`;
         }
-    } catch (error) {
-        console.error("Error Function updateTrackerUI: ", error);
     }
-}
+);
 
 // ==========================================
 // 4. XỬ LÝ MODAL & THU THẬP KÝ ỨC
 // ==========================================
 // Hàm mở Modal xem nội dung chi tiết mảnh ký ức
-function openMemoryModal(index) {
-    try {
-        // Kiểm tra mảng dữ liệu memoriesData có hợp lệ không
-        if (!Array.isArray(memoriesData) || memoriesData.length === 0) {
-            console.warn("Lỗi openMemoryModal: mảng memoriesData không hợp lệ hoặc rỗng.");
-            return;
-        }
+const openMemoryModal = withTryCatch(
+    function openMemoryModal(index) {
+        if (isInvalidArray(memoriesData)) return;
 
-        // Kiểm tra index hợp lệ (phải là số nguyên nằm trong khoảng [0, memoriesData.length - 1])
+        if (isInvalidIndexInArray(index, memoriesData.length)) return;
+
         const safeIndex = Number(index);
-        if (isNaN(safeIndex) || safeIndex < 0 || safeIndex >= memoriesData.length) {
-            console.warn(`Lỗi openMemoryModal: index (${index}) nằm ngoài phạm vi mảng dữ liệu.`);
-            return;
-        }
-
-        // Kiểm tra đối tượng dữ liệu tại vị trí safeIndex
         const data = memoriesData[safeIndex];
-        if (!data || typeof data !== 'object') {
-            console.warn(`Lỗi openMemoryModal: Dữ liệu ký ức tại index ${safeIndex} không tồn tại.`);
-            return;
-        }
+        if (!data || typeof data !== 'object') return;
 
-        // Lấy các phần tử DOM và kiểm tra phần tử khung Modal chính
-        const modalTitleEl = document.getElementById('modalTitle');
-        const modalImgEl = document.getElementById('modalImg');
-        const modalTextEl = document.getElementById('modalText');
-        const memoryModalEl = document.getElementById('memoryModal');
-
-        if (!memoryModalEl) {
-            console.error("Lỗi openMemoryModal: Không tìm thấy phần tử DOM #memoryModal.");
-            return;
-        }
-
-        if (modalTitleEl) modalTitleEl.innerText = data.title || '';
-        if (modalImgEl) modalImgEl.src = data.img || '';
-        if (modalTextEl) modalTextEl.innerText = data.text || '';
+        updateModalContent(data)
 
         // Cập nhật chỉ số ký ức đang xem để hàm closeMemoryModal xử lý nổ quả cầu
         activeMemoryIndex = safeIndex;
 
         // Hiển thị Modal lên màn hình
         memoryModalEl.classList.add('active');
-
-    } catch (error) {
-        console.error("Error Function openMemoryModal: ", error);
     }
-}
+);
 
 // Quản lý timer chuyển stage an toàn với clearTimeout
 let stageTransitionTimer = null;
@@ -340,30 +406,22 @@ function cancelStageTransition() {
 }
 
 // Hàm đóng Modal xem nội dung chi tiết mảnh ký ức
-function closeMemoryModal() {
-    try {
-        const memoryModalEl = document.getElementById('memoryModal');
-        if (memoryModalEl) {
-            memoryModalEl.classList.remove('active');
-        } else {
-            console.error("Lỗi closeMemoryModal: Không tìm thấy phần tử DOM #memoryModal.");
-        }
+const closeMemoryModal = withTryCatch(
+    function closeMemoryModal() {
+        updateModalContent(null, { action: 'remove' })
 
         // Lưu chỉ số hiện tại và reset activeMemoryIndex ngay để chống click trùng / gọi hàm lặp lại
         const currentIndex = activeMemoryIndex;
         activeMemoryIndex = null;
 
-        // Kiểm tra index hợp lệ và thuộc phạm vi mảng floatingOrbs
-        if (currentIndex === null || currentIndex < 0 || currentIndex >= floatingOrbs.length) {
-            return;
-        }
+        if (isInvalidIndexInArray(currentIndex, floatingOrbs.length)) return;
 
         const orb = floatingOrbs[currentIndex];
         // Chỉ xử lý nếu quả cầu tồn tại và chưa được thu thập
         if (orb && !orb.isCollected) {
             orb.popExplode?.();
             collectedCount++;
-            updateTrackerUI();
+            updateTrackerUI?.();
 
             // Nếu đã thu thập hết tất cả mảnh ký ức
             if (collectedCount >= memoriesData.length) {
@@ -381,11 +439,9 @@ function closeMemoryModal() {
                 }, 500);
             }
         }
-    } catch (error) {
-        console.error("Error Function closeMemoryModal: ", error);
-        activeMemoryIndex = null;
-    }
-}
+    },
+    () => { activeMemoryIndex = null; }
+)
 
 // ==========================================
 // 5. TRỨNG PHỤC SINH: BẤM 5 LẦN TRÁI TIM

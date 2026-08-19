@@ -587,10 +587,23 @@ function goToStage(stageNum) {
     }
 }
 
-function sendHeartReaction() {
-    createBurstParticles(window.innerWidth / 2, window.innerHeight - 100, 30, ['#ff4b8b', '#ff7eb3', '#ffffff']);
-    showToast("💖 Đã gửi ngàn trái tim yêu thương!");
-}
+let lastReactionTime = 0;
+
+const sendHeartReaction = withTryCatch(
+    function sendHeartReaction() {
+        const now = Date.now();
+
+        // Nếu thời gian giữa 2 lần bấm < 150ms thì bỏ qua
+        if (now - lastReactionTime < 150) return;
+        lastReactionTime = now;
+
+        // Tọa độ X (window.innerWidth / 2): Phát ra hạt từ chính giữa màn hình theo chiều ngang
+        // Tọa độ Y (window.innerHeight - 100): Phát ra hạt tại vị trí cách mép dưới màn hình 100px (ngay khu vực người dùng vừa bấm nút Thả tim)
+
+        createBurstParticles(window.innerWidth / 2, window.innerHeight - 100, 30, ['#ff4b8b', '#ff7eb3', '#ffffff']);
+        showToast("💖 Đã gửi ngàn trái tim yêu thương!");
+    }
+);
 
 const replayVideo = withTryCatch(
     function replayVideo() {

@@ -576,6 +576,7 @@ const replayVideo = withTryCatch(
         const video = document.getElementById('memoryVideo');
         if (!video || !(video instanceof HTMLMediaElement)) return;
 
+        // Xét thời gian của video về 0 giây (bắt đầu từ đầu)
         video.currentTime = 0;
 
         const playPromise = video.play();

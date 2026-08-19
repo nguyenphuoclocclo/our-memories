@@ -571,7 +571,7 @@ function sendHeartReaction() {
     showToast("💖 Đã gửi ngàn trái tim yêu thương!");
 }
 
-const replayVideo = withTryCatch(() => {
+const replayVideo = withTryCatch(
     function replayVideo() {
         const video = document.getElementById('memoryVideo');
         if (!video || !(video instanceof HTMLMediaElement)) return;
@@ -584,12 +584,12 @@ const replayVideo = withTryCatch(() => {
             playPromise.catch(error => console.warn('[replayVideo] Không thể tự động phát lại video:', error.name, error.message));
         }
     }
-})
+)
 
 let toastTimerId = null;
 
 const showToast = withTryCatch(
-    function showToast() {
+    function showToast(msg) {
         const toast = document.getElementById('toastMsg');
         if (!toast) return;
 

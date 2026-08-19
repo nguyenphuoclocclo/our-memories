@@ -571,18 +571,52 @@ function sendHeartReaction() {
     showToast("💖 Đã gửi ngàn trái tim yêu thương!");
 }
 
-function replayVideo() {
-    const video = document.getElementById('memoryVideo');
-    video.currentTime = 0;
-    video.play();
-}
+const replayVideo = withTryCatch(() => {
+    function replayVideo() {
+        const video = document.getElementById('memoryVideo');
+        if (!video || !(video instanceof HTMLMediaElement)) return;
 
-function showToast(msg) {
-    const toast = document.getElementById('toastMsg');
-    toast.innerText = msg;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3500);
-}
+        video.currentTime = 0;
+
+        const playPromise = video.play();
+
+        if (playPromise !== undefined && playPromise !== null) {
+            playPromise.catch(error => console.warn('[replayVideo] Không thể tự động phát lại video:', error.name, error.message));
+        }
+    }
+})
+
+let toastTimerId = null;
+
+const showToast = withTryCatch(
+    function showToast() {
+        const toast = document.getElementById('toastMsg');
+        if (!toast) return;
+
+        if (msg === null || msg === undefined) {
+            msg = '';
+        } else if (typeof msg !== 'string') {
+            msg = String(msg);
+        }
+
+        // Limit maximum length to prevent UI overflow
+        const MAX_LENGTH = 300;
+        if (msg.length > MAX_LENGTH) {
+            msg = msg.substring(0, MAX_LENGTH) + '...';
+        }
+
+        // Use textContent to prevent HTML/XSS injection
+        toast.textContent = msg;
+        toast.classList.add('show');
+
+        if (toastTimerId) clearTimeout(toastTimerId);
+
+        toastTimerId = setTimeout(() => {
+            toast.classList.remove('show');
+            toastTimerId = null;
+        }, 3500);
+    }
+)
 
 // ==========================================
 // 8. CANVAS PARTICLE SYSTEM (Pháo hoa, Sao & Tim)

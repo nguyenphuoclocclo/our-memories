@@ -502,7 +502,12 @@ document.getElementById('secretHeart').addEventListener('click', () => {
 // - false: Ngọn nến đang cháy
 // - true: Ngọn nến đã bị thổi tắt
 let candlesBlown = [false, false, false];
+
+// Cờ đánh dấu đã hoàn thành cắt bánh
 let isCakeCut = false;
+
+// Cờ đánh dấu đã hoàn thành thổi nến
+let isAllCandlesBlown = false;
 
 function blowCandleSingle(index) {
     if (candlesBlown[index]) return;
@@ -521,9 +526,6 @@ function blowCandleSingle(index) {
 function blowCandlesAll() {
     [0, 1, 2].forEach(i => blowCandleSingle(i));
 }
-
-// Cờ đánh dấu đã hoàn thành thổi nến
-let isAllCandlesBlown = false;
 
 // - Kiểm tra xem tất cả các ngọn nến trên chiếc bánh sinh nhật đã được thổi tắt hết hay chưa
 // - Khi toàn bộ nến đã tắt, hàm sẽ tự động kích hoạt chuỗi hiệu ứng ăn mừng (thông báo lời chúc, bắn hiệu ứng pháo hoa/kim tuyến), khóa nút thổi nến để tránh bấm lại, và gửi tín hiệu kiểm tra xem người dùng đã đủ điều kiện mở khóa video kỷ niệm hay chưa
@@ -564,13 +566,18 @@ function cutCake() {
     checkUnlockVideo();
 }
 
-function checkUnlockVideo() {
-    if (candlesBlown.every(b => b) || isCakeCut) {
-        const btnGoVideo = document.getElementById('btnGoVideo');
-        btnGoVideo.style.display = 'flex';
-        btnGoVideo.classList.add('pulse');
+const checkUnlockVideo = withTryCatch(
+    function checkUnlockVideo() {
+        // Đảm bảo người dùng đã thổi tắt tất cả 3 ngọn nến sinh nhật và đã nhấn cắt bánh sinh nhật
+        if (isAllCandlesBlown && isCakeCut) {
+            const btnGoVideo = document.getElementById('btnGoVideo');
+            if (btnGoVideo) {
+                btnGoVideo.style.display = 'flex';
+                btnGoVideo.classList.add('pulse');
+            }
+        }
     }
-}
+);
 
 function createSmokePuff(svgX, svgY) {
     const cakeBox = document.querySelector('.cake-container').getBoundingClientRect();

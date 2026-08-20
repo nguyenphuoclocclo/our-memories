@@ -7,6 +7,7 @@ const memoryModalEl = document.getElementById('memoryModal');
 const modalTitleEl = document.getElementById('modalTitle');
 const modalImgEl = document.getElementById('modalImg');
 const modalTextEl = document.getElementById('modalText');
+const btnBlowEl = document.getElementById('btnBlow');
 
 // ==========================================
 // COMMON FUNCTION
@@ -497,6 +498,9 @@ document.getElementById('secretHeart').addEventListener('click', () => {
 // ==========================================
 // 6. GIAI ĐOẠN 2: BÁNH KEM & THỔI NẾN INTERACTIVE
 // ==========================================
+// Biến candlesBlown: Là một mảng lưu trạng thái của 3 ngọn nến, mặc định khởi tạo là [false, false, false]
+// - false: Ngọn nến đang cháy
+// - true: Ngọn nến đã bị thổi tắt
 let candlesBlown = [false, false, false];
 let isCakeCut = false;
 
@@ -518,15 +522,36 @@ function blowCandlesAll() {
     [0, 1, 2].forEach(i => blowCandleSingle(i));
 }
 
-function checkAllCandlesBlown() {
-    if (candlesBlown.every(b => b)) {
-        showToast("🌟 Ngọn nến đã tắt! Lời ước nguyện của bạn sẽ thành hiện thực! ✨");
-        createConfetti();
-        document.getElementById('btnBlow').innerText = "✨ Đã Thổi Nến & Ước";
-        document.getElementById('btnBlow').disabled = true;
-        checkUnlockVideo();
+// Cờ đánh dấu đã hoàn thành thổi nến
+let isAllCandlesBlown = false;
+
+// - Kiểm tra xem tất cả các ngọn nến trên chiếc bánh sinh nhật đã được thổi tắt hết hay chưa
+// - Khi toàn bộ nến đã tắt, hàm sẽ tự động kích hoạt chuỗi hiệu ứng ăn mừng (thông báo lời chúc, bắn hiệu ứng pháo hoa/kim tuyến), khóa nút thổi nến để tránh bấm lại, và gửi tín hiệu kiểm tra xem người dùng đã đủ điều kiện mở khóa video kỷ niệm hay chưa
+const checkAllCandlesBlown = withTryCatch(
+    function checkAllCandlesBlown() {
+        // Nếu đã hoàn thành thổi nến rồi thì không chạy lại (tránh trùng lặp hiệu ứng)
+        if (isAllCandlesBlown) return;
+
+        if (isInvalidArray(candlesBlown)) return;
+
+        if (candlesBlown.every(b => b)) {
+            isAllCandlesBlown = true;
+
+            showToast("🌟 Ngọn nến đã tắt! Lời ước nguyện của bạn sẽ thành hiện thực! ✨");
+
+            //  Gọi hàm tạo hiệu ứng kim tuyến/pháo hoa nổ tung tóe đầy màu sắc rơi khắp màn hình để tạo cảm giác bất ngờ và phấn khích
+            createConfetti?.();
+
+            if (btnBlowEl) {
+                btnBlowEl.innerText = "✨ Đã Thổi Nến & Ước";
+                btnBlowEl.disabled = true;
+            }
+
+            // Gọi hàm kiểm tra điều kiện mở khóa phần thưởng tiếp theo (ví dụ: xem đã thổi nến xong + cắt bánh xong chưa để tự động mở khóa Video sinh nhật bí mật)
+            checkUnlockVideo?.();
+        }
     }
-}
+);
 
 function cutCake() {
     if (isCakeCut) return;

@@ -318,7 +318,6 @@ class FloatingOrb {
         // Nếu quả cầu đã bị nổ/thu thập trước đó hoặc phần tử không tồn tại thì không thực thi gì cả
         if (this.isCollected || !this.element) return;
 
-        // Đánh dấu đã thu thập ngay lập tức để chặn các cuộc gọi lặp lại
         this.isCollected = true;
 
         // Chặn tương tác chuột ngay lập tức trong 0.4s diễn ra hiệu ứng nổ
@@ -377,10 +376,43 @@ function initFloatingOrbs() {
     updateTrackerUI();
 }
 
-function animateOrbs() {
-    floatingOrbs.forEach(orb => orb.update());
-    requestAnimationFrame(animateOrbs);
-}
+let orbAnimationId = null;
+let isOrbAnimating = false;
+
+const startAnimateOrbs = withTryCatch(
+    function startAnimateOrbs() {
+        if (!isOrbAnimating) {
+            isOrbAnimating = true;
+            animateOrbs();
+        }
+    }
+);
+
+const stopAnimateOrbs = withTryCatch(
+    function stopAnimateOrbs() {
+        if (orbAnimationId) {
+            cancelAnimationFrame(orbAnimationId);
+            orbAnimationId = null;
+        }
+
+        isOrbAnimating = false;
+    }
+);
+
+// animateOrbs là vòng lặp hoạt họa (Animation Loop) chịu trách nhiệm cập nhật chuyển động liên tục (60fps+) cho tất cả các quả cầu lơ lửng (floatingOrbs) trên giao diện web
+const animateOrbs = withTryCatch(
+    function animateOrbs() {
+        if (isInvalidArray(floatingOrbs, stopAnimateOrbs)) return;
+
+        floatingOrbs.forEach(orb => {
+            if (orb) {
+                orb?.update();
+            }
+        });
+
+        orbAnimationId = requestAnimationFrame(animateOrbs);
+    }
+);
 
 // Hàm này là cập nhật con số và thanh phần trăm tiến độ thu thập ký ức hiển thị trên giao diện người dùng (UI)
 const updateTrackerUI = withTryCatch(
@@ -449,7 +481,7 @@ const closeMemoryModal = withTryCatch(
         const currentIndex = activeMemoryIndex;
         activeMemoryIndex = null;
 
-        if (isInvalidIndexInArray(currentIndex, floatingOrbs.length)) return;
+        if (isInvalidIndexInArray(currentIndex, floatingOrbs?.length || 0)) return;
 
         const orb = floatingOrbs[currentIndex];
         // Chỉ xử lý nếu quả cầu tồn tại và chưa được thu thập
@@ -541,7 +573,7 @@ const blowCandleSingle = withTryCatch(
 
         checkAllCandlesBlown?.();
     }
-)
+);
 
 const blowCandlesAll = withTryCatch(
     // Hàm này dùng để dập tắt tất cả 3 ngọn nến trên bánh sinh nhật cùng một lúc
@@ -917,6 +949,6 @@ if (starsContainer) {
 // KÍCH HOẠT KHỞI TẠO
 window.addEventListener('DOMContentLoaded', () => {
     initFloatingOrbs();
-    animateOrbs();
+    startAnimateOrbs();
     renderParticles();
 });

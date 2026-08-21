@@ -9,6 +9,12 @@ const modalImgEl = document.getElementById('modalImg');
 const modalTextEl = document.getElementById('modalText');
 const btnBlowEl = document.getElementById('btnBlow');
 
+const daysEl = document.getElementById('days');
+const hoursEl = document.getElementById('hours');
+const minutesEl = document.getElementById('minutes');
+const secondsEl = document.getElementById('seconds');
+
+
 // ==========================================
 // COMMON FUNCTION
 function withTryCatch(fn, onError = undefined, shouldThrowError = false) {
@@ -110,20 +116,26 @@ function updateModalContent(data = null, options = {}) {
 }
 // ==========================================
 
-function updateTimer() {
-    const now = new Date();
-    const diff = now - startDate;
+const updateTimer = withTryCatch(
+    function updateTimer() {
+        if (!startDate || !(startDate instanceof Date) || isNaN(startDate.getTime())) return;
 
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const minutes = Math.floor((diff / 1000 / 60) % 60);
-    const seconds = Math.floor((diff / 1000) % 60);
+        const now = new Date();
+        const diff = now - startDate;
 
-    document.getElementById('days').innerText = days < 10 ? '0' + days : days;
-    document.getElementById('hours').innerText = hours < 10 ? '0' + hours : hours;
-    document.getElementById('minutes').innerText = minutes < 10 ? '0' + minutes : minutes;
-    document.getElementById('seconds').innerText = seconds < 10 ? '0' + seconds : seconds;
-};
+        if (diff < 0) return;
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((diff / 1000 / 60) % 60);
+        const seconds = Math.floor((diff / 1000) % 60);
+
+        if (daysEl) daysEl.innerText = String(days).padStart(2, '0');
+        if (hoursEl) hoursEl.innerText = String(hours).padStart(2, '0');
+        if (minutesEl) minutesEl.innerText = String(minutes).padStart(2, '0');
+        if (secondsEl) secondsEl.innerText = String(seconds).padStart(2, '0');
+    }
+);
 setInterval(updateTimer, 1000);
 updateTimer();
 

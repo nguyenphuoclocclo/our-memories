@@ -689,15 +689,22 @@ const showToast = withTryCatch(
 // 8. CANVAS PARTICLE SYSTEM (Pháo hoa, Sao & Tim)
 // ==========================================
 const canvas = document.getElementById('particle-canvas');
-const ctx = canvas.getContext('2d');
+const ctx = canvas ? canvas.getContext('2d') : null;
 let particles = [];
 
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+const resizeCanvas = withTryCatch(
+    function resizeCanvas() {
+        if (!canvas) return;
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+);
+
+if (canvas) {
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 }
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
 
 class Particle {
     constructor(x, y, color) {
@@ -752,19 +759,58 @@ function createBurstParticles(x, y, count = 20, colors = ['#ff4b8b', '#ffd700', 
     }
 }
 
-function createConfetti() {
-    const colors = ['#ff4b8b', '#ff7eb3', '#ffd700', '#60a5fa', '#a7f3d0', '#ffffff'];
-    for (let i = 0; i < 80; i++) {
-        const x = Math.random() * canvas.width;
-        const y = -10;
-        const p = new Particle(x, y, colors[Math.floor(Math.random() * colors.length)]);
-        p.vy = Math.random() * 5 + 3;
-        p.vx = (Math.random() - 0.5) * 4;
-        p.gravity = 0.05;
-        p.decay = 0.008;
-        particles.push(p);
+// Hàm này có nhiệm vụ tạo ra một cơn mưa hoa giấy/pháo giấy (Confetti Burst) bao gồm 80 mảnh pháo giấy với nhiều màu sắc rực rỡ, xuất hiện ngẫu nhiên ở phía trên cùng màn hình và bồng bềnh rơi xuống dưới
+const createConfetti = withTryCatch(
+    function createConfetti() {
+        if (!canvas || !ctx || isInvalidArray(particles, undefined, false)) return;
+
+        // Giới hạn số lượng hạt tối đa đang tồn tại cùng lúc để tránh lag
+        if (particles.length > 400) return;
+
+        const colors = ['#ff4b8b', '#ff7eb3', '#ffd700', '#60a5fa', '#a7f3d0', '#ffffff'];
+        const width = canvas.width || window.innerWidth;
+
+        for (let i = 0; i < 80; i++) {
+            // Tọa độ X ngẫu nhiên trải dài toàn màn hình
+            const x = Math.random() * width;
+
+            // Tọa độ Y bắt đầu ẩn ở phía trên đỉnh màn hình (10px bên ngoài viewport)
+            // Các hạt bắt đầu ở vị trí bên ngoài tầm mắt phía trên màn hình. Khi rơi xuống, người dùng sẽ thấy hoa giấy xuất hiện tự nhiên từ trên trời rơi xuống chứ không đột ngột hiện ra giữa màn hình
+            const y = -10;
+
+            const p = new Particle(
+                x,
+                y,
+                colors[Math.floor(Math.random() * colors.length)]
+            );
+
+            // Gán các thông số vật lý tùy chỉnh cho hiệu ứng pháo giấy rơi
+
+            // - Vận tốc rơi xuống theo trục dọc từ 3px đến 8px/frame
+            // - Giá trị vy dương giúp hạt ngay lập tức rơi xuống dưới
+            // - Hạt rơi nhanh, hạt rơi chậm tạo nên chiều sâu chuyển động
+            p.vy = Math.random() * 5 + 3;
+
+            // - Vận tốc dạt ngang từ -2px đến +2px/frame
+            // - Nếu vx < 0: Hạt sẽ bị dạt sang trái
+            // - Nếu vx > 0: Hạt sẽ bị dạt sang phải
+            // - Giúp hoa giấy rơi theo đường chéo nghiêng nhẹ tự nhiên như có gió thổi
+            p.vx = (Math.random() - 0.5) * 4;
+
+            // - Trọng lực siêu nhẹ (giúp bồng bềnh)
+            // - Giảm gia tốc rơi, giúp mảnh giấy rơi bồng bềnh, chầm chậm đúng chất pháo giấy nhẹ thay vì rơi như đá chìm
+            p.gravity = 0.05;
+
+            // - Tốc độ mờ dần rất chậm (~2 giây mới biến mất)
+            // - Độ mờ alpha bắt đầu từ 1.0
+            // - Mỗi khung hình (frame), alpha giảm đi 0.008
+            // - Ở 60fps, hạt sẽ tồn tại trong khoảng 2.08 giây, vừa đủ thời gian để hoa giấy rơi từ đỉnh màn hình xuống gần đáy màn hình trước khi tan biến
+            p.decay = 0.008;
+
+            particles.push(p);
+        }
     }
-}
+);
 
 function renderParticles() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);

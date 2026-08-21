@@ -8,6 +8,7 @@ const modalTitleEl = document.getElementById('modalTitle');
 const modalImgEl = document.getElementById('modalImg');
 const modalTextEl = document.getElementById('modalText');
 const btnBlowEl = document.getElementById('btnBlow');
+const btnCutEl = document.getElementById('btnCut');
 
 const daysEl = document.getElementById('days');
 const hoursEl = document.getElementById('hours');
@@ -535,9 +536,16 @@ function blowCandleSingle(index) {
     checkAllCandlesBlown();
 }
 
-function blowCandlesAll() {
-    [0, 1, 2].forEach(i => blowCandleSingle(i));
-}
+const blowCandlesAll = withTryCatch(
+    // Hàm này dùng để dập tắt tất cả 3 ngọn nến trên bánh sinh nhật cùng một lúc
+    function blowCandlesAll() {
+        if (isAllCandlesBlown) return;
+
+        if (isInvalidArray(candlesBlown)) return;
+
+        candlesBlown.forEach((_, index) => blowCandleSingle(index));
+    }
+);
 
 // - Kiểm tra xem tất cả các ngọn nến trên chiếc bánh sinh nhật đã được thổi tắt hết hay chưa
 // - Khi toàn bộ nến đã tắt, hàm sẽ tự động kích hoạt chuỗi hiệu ứng ăn mừng (thông báo lời chúc, bắn hiệu ứng pháo hoa/kim tuyến), khóa nút thổi nến để tránh bấm lại, và gửi tín hiệu kiểm tra xem người dùng đã đủ điều kiện mở khóa video kỷ niệm hay chưa
@@ -553,7 +561,7 @@ const checkAllCandlesBlown = withTryCatch(
 
             showToast("🌟 Ngọn nến đã tắt! Lời ước nguyện của bạn sẽ thành hiện thực! ✨");
 
-            //  Gọi hàm tạo hiệu ứng kim tuyến/pháo hoa nổ tung tóe đầy màu sắc rơi khắp màn hình để tạo cảm giác bất ngờ và phấn khích
+            // Gọi hàm tạo hiệu ứng kim tuyến/pháo hoa nổ tung tóe đầy màu sắc rơi khắp màn hình để tạo cảm giác bất ngờ và phấn khích
             createConfetti?.();
 
             if (btnBlowEl) {
@@ -561,22 +569,39 @@ const checkAllCandlesBlown = withTryCatch(
                 btnBlowEl.disabled = true;
             }
 
-            // Gọi hàm kiểm tra điều kiện mở khóa phần thưởng tiếp theo (ví dụ: xem đã thổi nến xong + cắt bánh xong chưa để tự động mở khóa Video sinh nhật bí mật)
             checkUnlockVideo?.();
         }
     }
 );
 
-function cutCake() {
-    if (isCakeCut) return;
-    isCakeCut = true;
-    document.getElementById('cakeSvg').classList.add('cake-sliced');
-    createBurstParticles(window.innerWidth / 2, window.innerHeight / 2, 40, ['#ff7eb3', '#ffd700', '#ffffff']);
-    showToast("🍰 Cắt bánh thành công! Chúc mừng sinh nhật tràn ngập niềm vui! 🎉");
-    document.getElementById('btnCut').innerText = "🍰 Đã Cắt Bánh";
-    document.getElementById('btnCut').disabled = true;
-    checkUnlockVideo();
-}
+const cutCake = withTryCatch(
+    function cutCake() {
+        // Nếu đã hoàn thành cắt bánh rồi thì không chạy lại (tránh trùng lặp hiệu ứng)
+        if (isCakeCut) return;
+
+        isCakeCut = true;
+
+        const cakeSvgEl = document.getElementById('cakeSvg')
+
+        if (cakeSvgEl) cakeSvgEl.classList.add('cake-sliced');
+
+        createBurstParticles?.(
+            window.innerWidth / 2,
+            window.innerHeight / 2,
+            40,
+            ['#ff7eb3', '#ffd700', '#ffffff']
+        );
+
+        showToast("🍰 Cắt bánh thành công! Chúc mừng sinh nhật tràn ngập niềm vui! 🎉");
+
+        if (btnCutEl) {
+            btnCutEl.innerText = "🍰 Đã Cắt Bánh";
+            btnCutEl.disabled = true;
+        }
+
+        checkUnlockVideo?.();
+    }
+);
 
 const checkUnlockVideo = withTryCatch(
     function checkUnlockVideo() {
@@ -625,7 +650,6 @@ const createSmokePuff = withTryCatch(
             smoke.style.top = posY + 'px';
             document.body.appendChild(smoke);
 
-            // Hẹn giờ sau 1.5 giây sẽ tự động xóa thẻ khói khỏi bộ nhớ trang web
             setTimeout(() => smoke.remove(), 1500);
         }
     }
@@ -679,7 +703,6 @@ const replayVideo = withTryCatch(
         const video = document.getElementById('memoryVideo');
         if (!video || !(video instanceof HTMLMediaElement)) return;
 
-        // Xét thời gian của video về 0 giây (bắt đầu từ đầu)
         video.currentTime = 0;
 
         const playPromise = video.play();
@@ -777,15 +800,13 @@ class Particle {
 // Hàm này có nhiệm vụ tạo ra một hiệu ứng bùng nổ hạt (Particle Burst / Explosion Effect) tại một vị trí tọa độ (x, y) xác định trên màn hình (HTML5 Canvas)
 // Mỗi khi hàm này được gọi (ví dụ: khi người dùng nhấp chuột, hoàn thành nhiệm vụ, mở hiệu ứng chúc mừng...), nó sẽ sinh ra một loạt các hạt nhỏ với màu sắc ngẫu nhiên và thêm chúng vào mảng quản lý hạt particles
 function createBurstParticles(x, y, count = 20, colors = ['#ff4b8b', '#ffd700', '#ffffff']) {
-    // count: Số lượng hạt sẽ được tạo ra
-
     if (!Array.isArray(particles)) return;
 
     if (typeof x !== 'number' || typeof y !== 'number' || Number.isNaN(x) || Number.isNaN(y)) return;
 
     if (isInvalidArray(colors)) return;
 
-    // GIỚI HẠN TỐI ĐA (vd: tối đa 100 hạt/lần) để tránh lag
+    // GIỚI HẠN TỐI ĐA để tránh lag
     const safeCount = Math.min(Math.max(0, Math.floor(count) || 0), 100);
     if (safeCount <= 0) return;
 
@@ -869,10 +890,8 @@ if (starsContainer) {
     // Đoạn code này tạo hiệu ứng "Nền vũ trụ sao lấp lánh"
     for (let i = 0; i < 45; i++) {
         const star = document.createElement('div');
-
         star.classList.add('star');
 
-        // Đặt chiều rộng ngẫu nhiên cho ngôi sao từ 1px đến 4px
         star.style.width = Math.random() * 3 + 1 + 'px';
         star.style.height = star.style.width;
 

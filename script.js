@@ -828,15 +828,28 @@ function renderParticles() {
 // 9. NỀN VŨ TRỤ SAO LẤP LÁNH
 // ==========================================
 const starsContainer = document.getElementById('stars-container');
-for (let i = 0; i < 45; i++) {
-    const star = document.createElement('div');
-    star.classList.add('star');
-    star.style.width = Math.random() * 3 + 1 + 'px';
-    star.style.height = star.style.width;
-    star.style.left = Math.random() * 100 + '%';
-    star.style.top = Math.random() * 100 + '%';
-    star.style.animationDuration = (Math.random() * 3 + 2) + 's';
-    starsContainer.appendChild(star);
+if (starsContainer) {
+    // Đoạn code này tạo hiệu ứng "Nền vũ trụ sao lấp lánh"
+    for (let i = 0; i < 45; i++) {
+        const star = document.createElement('div');
+
+        star.classList.add('star');
+
+        // Đặt chiều rộng ngẫu nhiên cho ngôi sao từ 1px đến 4px
+        star.style.width = Math.random() * 3 + 1 + 'px';
+        star.style.height = star.style.width;
+
+        // Đặt vị trí của ngôi sao theo trục nằm ngang (X), rải đều ngẫu nhiên từ mép cực trái đến mép cực phải
+        star.style.left = Math.random() * 100 + '%';
+
+        // Đặt vị trí của ngôi sao theo trục dọc (Y), rải đều ngẫu nhiên từ đỉnh trên cùng xuống đáy dưới cùng
+        star.style.top = Math.random() * 100 + '%';
+
+        // Giúp các ngôi sao nhấp nháy lệch pha nhau (sao mờ nhanh, sao mờ chậm), tránh hiện tượng tất cả 45 ngôi sao cùng sáng/tối đồng loạt nhìn rất đơ
+        star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+
+        starsContainer.appendChild(star);
+    }
 }
 
 // KÍCH HOẠT KHỞI TẠO

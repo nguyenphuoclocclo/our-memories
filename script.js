@@ -699,27 +699,54 @@ const createSmokePuff = withTryCatch(
 // ==========================================
 // 7. GIAI ĐOẠN 3 & CHUYỂN STAGE
 // ==========================================
-function goToStage(stageNum) {
-    // Hủy các timer chuyển stage đang đếm ngược ngầm nếu người dùng chủ động chuyển stage
-    cancelStageTransition();
+const goToStage = withTryCatch(
+    function goToStage(stageNum) {
+        if (typeof stageNum !== 'number' || isNaN(stageNum) || stageNum < 1) {
+            console.warn(`[goToStage] stageNum không hợp lệ:`, stageNum);
+            return;
+        }
 
-    document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
-    document.getElementById(`stage-${stageNum}`).classList.add('active');
+        const targetStage = document.getElementById(`stage-${stageNum}`);
+        if (!targetStage) {
+            console.error(`[goToStage] Không tìm thấy phần tử DOM với id: #stage-${stageNum}`);
+            return;
+        }
 
-    if (stageNum === 3) {
+        // Tránh thực thi lại nếu đã ở sẵn stage này
+        if (targetStage.classList.contains('active')) return;
+
+        // Hủy các timer chuyển stage đang đếm ngược ngầm nếu người dùng chủ động chuyển stage
+        cancelStageTransition?.();
+
+        document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
+        targetStage.classList.add('active');
+
         const video = document.getElementById('memoryVideo');
-        video.play().catch(() => {
-            // Autoplay restriction policy handle
-        });
-        createConfetti();
-    } else {
-        const video = document.getElementById('memoryVideo');
-        if (video) video.pause();
-        if (stageNum === 1 && collectedCount >= memoriesData.length) {
-            initFloatingOrbs(); // Reset lại các quả cầu nếu về lại Stage 1
+
+        if (stageNum === 3) {
+            if (video) {
+                video.currentTime = 0;
+                video.play().catch(err => {
+                    console.log('[goToStage] Autoplay bị trình duyệt hạn chế:', err);
+                });
+            }
+
+            createConfetti?.();
+        } else {
+            if (video) video.pause();
+
+            if (
+                stageNum === 1 &&
+                typeof collectedCount === 'number' &&
+                !isNaN(collectedCount) &&
+                Array.isArray(memoriesData) &&
+                collectedCount >= memoriesData.length
+            ) {
+                initFloatingOrbs?.(); // Reset lại các quả cầu nếu về lại Stage 1
+            }
         }
     }
-}
+);
 
 let lastReactionTime = 0;
 

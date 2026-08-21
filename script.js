@@ -19,19 +19,6 @@ const secondsEl = document.getElementById('seconds');
 // ==========================================
 // COMMON FUNCTION
 function withTryCatch(fn, onError = undefined, shouldThrowError = false) {
-    // Tại sao phải return function ? Vì nếu chúng ta viết như đoạn code dưới đây thì Function sẽ chạy ngay lập tức
-    //     function withTryCatch(fn) {
-    //      try {
-    //         return fn();
-    //      } catch (error) {
-    //         ...
-    //      }
-    // }
-
-    // const safeUpdate = withTryCatch(updatePosition);
-    // => updatePosition() sẽ chạy ngay tại dòng này. Đây không phải điều chúng ta muốn. Chúng ta muốn
-    // const safeUpdate = withTryCatch(updatePosition);
-    // Hàm safeUpdate chỉ được chạy khi và chỉ khi có đoạn nào đó gọi đến nó: safeUpdate();. Vì vậy phải return một function
     return function (...args) {
         try {
             return fn.apply(this, args);
@@ -212,7 +199,7 @@ class FloatingOrb {
         const padding = 60; // Lùi vào 60px từ các mép màn hình (để quả cầu không bị mép màn hình che mất)
         const headerOffset = 220; // Chừa lại 220px tính từ đỉnh màn hình xuống (tránh việc quả cầu xuất hiện đè lên thanh Tiêu đề / Header của trang web)
 
-        // Kích thước ước tính của quả cầu (rộng 180px, cao 45px)
+        // Kích thước ước tính của quả cầu
         this.width = 180;
         this.height = 45;
 
@@ -262,15 +249,12 @@ class FloatingOrb {
         this.element.addEventListener('click', (e) => {
             e.stopPropagation();
             if (this.index !== null && this.index !== undefined) {
-                // Gọi hàm mở hộp thoại Pop-up (modal) để hiển thị chi tiết bức ảnh/kỷ niệm của quả cầu thứ this.index
                 openMemoryModal(this.index);
             }
         });
 
-        // Chính thức chèn thẻ <div> quả cầu vào khung chứa floatingArea trên giao diện HTML thật. Bây giờ quả cầu đã xuất hiện trên màn hình
         floatingArea.appendChild(this.element);
 
-        // Gọi ngay hàm vẽ vị trí để áp dụng tọa độ (X, Y) vừa tính ở trên lên thuộc tính CSS transform: translate3d(x, y, 0) giúp quả cầu nhảy ngay tới vị trí cần đứng
         this.updatePosition();
     }
 
@@ -304,11 +288,7 @@ class FloatingOrb {
     updatePosition(sinOffset = 0) {
         // Tại sao dùng translate3d(...) mà không dùng top/left? Dùng translate3d giúp trình duyệt kích hoạt tăng tốc phần cứng GPU. Khi quả cầu di chuyển liên tục 60fps/120fps,
         // GPU sẽ xử lý cực mượt mà không gây giật lag hay bắt trình duyệt phải tính toán lại bố cục toàn trang
-
         // transform thay đổi vị trí hiển thị của element mà không làm thay đổi layout của document, nên phù hợp cho animation/movement liên tục
-
-        // Nếu sinOffset là một số hữu hạn (kể cả số âm), giữ nguyên giá trị.
-        // Nếu không phải số hữu hạn như null, undefined, NaN, Infinity... thì dùng 0
         const validOffset = Number.isFinite(sinOffset) ? sinOffset : 0;
         this.element.style.transform = `translate3d(${this.x}px, ${this.y + validOffset}px, 0)`;
     }

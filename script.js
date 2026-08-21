@@ -849,16 +849,35 @@ if (canvas) {
     resizeCanvas();
 }
 
+// Particle (Hạt) là một mẫu thiết kế (Blueprint) đại diện cho 1 hạt pháo hoa / hạt hoa giấy lẻ
 class Particle {
     constructor(x, y, color) {
+        // Vị trí khởi tạo: Tọa độ ban đầu nơi hạt sinh ra trên Canvas
         this.x = x;
         this.y = y;
+
+        // Màu sắc: Màu của hạt 
         this.color = color;
+
+        // Bán kính hạt (tính bằng pixel)
+        // Tạo ra các hạt to nhỏ khác nhau giúp chùm pháo hoa tự nhiên, không bị cứng nhắc đồng khuôn
         this.size = Math.random() * 6 + 3;
+
+        // Vận tốc ngang (X-axis velocity): Dấu âm (-) là hạt bắn sang trái, dấu dương (+) là hạt bắn sang phải
         this.vx = (Math.random() - 0.5) * 8;
+
+        // Vận tốc dọc (Y-axis velocity): Trong tọa độ máy tính, gốc (0,0) ở đỉnh màn hình và chiều Y hướng xuống dưới. Vận tốc âm (vy < 0) nghĩa là hạt bắn vút lên trên. Việc - 2 giúp ưu tiên đa số hạt khi vừa nổ sẽ bắn vút lên trời trước khi rơi xuống (y hệt pháo hoa thực tế)
         this.vy = (Math.random() - 0.5) * 8 - 2;
+
+        // Độ hiển thị (Opacity / Transparency)
         this.alpha = 1;
+
+        // + Tốc độ tan biến (Fade Decay Rate)
+        // - Ngẫu nhiên từ 0.015 đến 0.035 mỗi khung hình
+        // - Ý nghĩa: Mỗi khung hình, độ rõ alpha bị giảm đi một lượng từ 0.015 đến 0.035. Hạt sẽ mờ hoàn toàn (alpha = 0) sau khoảng 30 - 50 khung hình (~0.5 đến 0.8 giây). Hạt tan nhanh, hạt tan chậm tạo hiệu ứng sinh động
         this.decay = Math.random() * 0.02 + 0.015;
+
+        // Gia tốc trọng lực (Lực hút Trái Đất): Mỗi khung hình, vận tốc dọc vy sẽ bị cộng thêm 0.15px kéo hạt rơi cong xuống dưới
         this.gravity = 0.15;
     }
 

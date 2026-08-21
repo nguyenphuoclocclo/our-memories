@@ -942,8 +942,6 @@ const renderParticles = withTryCatch(
 
         if (particles?.length > 0) {
             particleAnimationFrameId = requestAnimationFrame(renderParticles);
-        } else {
-            stopParticles();
         }
     }
 );

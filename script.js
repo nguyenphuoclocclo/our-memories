@@ -494,18 +494,40 @@ const closeMemoryModal = withTryCatch(
 // 5. TRỨNG PHỤC SINH: BẤM 5 LẦN TRÁI TIM
 // ==========================================
 let heartClickCount = 0;
-document.getElementById('secretHeart').addEventListener('click', () => {
-    heartClickCount++;
-    createBurstParticles(window.innerWidth / 2, 100, 15, ['#ff4b8b', '#ff7eb3']);
-    if (heartClickCount === 5) {
-        document.getElementById('modalTitle').innerText = "💌 Lời Nhắn Bí Mật Cực Lớn!";
-        document.getElementById('modalImg').src = "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=600&q=80";
-        document.getElementById('modalText').innerText = "Chúc mừng bạn đã tìm thấy Trứng Phục Sinh bí mật! Cảm ơn vì đã luôn ở bên cạnh, cùng nhau sẻ chia và yêu thương từng khoảnh khắc. Yêu bạn nhiều lắm! 💖✨";
-        activeMemoryIndex = null; // Không tính thu thập orb
-        document.getElementById('memoryModal').classList.add('active');
-        heartClickCount = 0;
-    }
-});
+
+const secretHeartEl = document.getElementById('secretHeart');
+if (secretHeartEl) {
+    // Khi người dùng nhấp 5 lần liên tiếp vào biểu tượng trái tim bí mật, ứng dụng sẽ tạo hiệu ứng bắn hạt pháo hoa hồng và mở một Modal chứa thông điệp đặc biệt
+    secretHeartEl.addEventListener('click', () => {
+        // Nếu Modal đã được hiển thị rồi thì không thực thi nữa
+        if (memoryModalEl && memoryModalEl.classList.contains('active')) return;
+
+        heartClickCount++;
+
+        const clickX = e.clientX || window.innerWidth / 2;
+        const clickY = e.clientY || 100;
+
+        // Bắn hạt ngay tại vị trí con trỏ chuột/ngón tay click
+        createBurstParticles?.(
+            clickX,
+            clickY,
+            15,
+            ['#ff4b8b', '#ff7eb3']
+        );
+
+        const data = {
+            title: "💌 Lời Nhắn Bí Mật Cực Lớn!",
+            img: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=600&q=80",
+            text: "Chúc mừng bạn đã tìm thấy Trứng Phục Sinh bí mật! Cảm ơn vì đã luôn ở bên cạnh, cùng nhau sẻ chia và yêu thương từng khoảnh khắc. Yêu bạn nhiều lắm! 💖✨"
+        };
+
+        if (heartClickCount === 5) {
+            updateModalContent?.(data, { action: "add" })
+            activeMemoryIndex = null; // Không tính thu thập orb
+            heartClickCount = 0;
+        }
+    });
+}
 
 // ==========================================
 // 6. GIAI ĐOẠN 2: BÁNH KEM & THỔI NẾN INTERACTIVE

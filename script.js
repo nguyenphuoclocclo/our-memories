@@ -509,19 +509,39 @@ let isCakeCut = false;
 // Cờ đánh dấu đã hoàn thành thổi nến
 let isAllCandlesBlown = false;
 
-function blowCandleSingle(index) {
-    if (candlesBlown[index]) return;
-    candlesBlown[index] = true;
-    document.querySelector(`.flame-${index}`).classList.add('extinguished');
+const blowCandleSingle = withTryCatch(
+    function blowCandleSingle(index) {
+        if (isInvalidArray(candlesBlown)) return;
 
-    // Tọa độ nến tương ứng
-    const candleCoords = [
-        { x: 65, y: 14 }, { x: 100, y: 8 }, { x: 135, y: 14 }
-    ];
-    createSmokePuff(candleCoords[index].x, candleCoords[index].y);
+        if (isInvalidIndexInArray(index, candlesBlown.length)) return;
 
-    checkAllCandlesBlown();
-}
+        // Nếu nến này đã tắt rồi thì không xử lý lại
+        if (candlesBlown[index]) return;
+
+        // Đánh dấu nến đã bị thổi tắt
+        candlesBlown[index] = true;
+
+        const flameItem = document.querySelector(`.flame-${index}`);
+
+        // Ẩn/dập ngọn lửa
+        if (flameItem) flameItem.classList.add('extinguished');
+
+        // Tọa độ tương ứng của 3 ngọn nến
+        const candleCoords = [
+            { x: 65, y: 14 },
+            { x: 100, y: 8 },
+            { x: 135, y: 14 }
+        ];
+
+        const targetCoord = candleCoords[index];
+        if (targetCoord) {
+            // Tạo hiệu ứng khói tại đúng đỉnh ngọn nến vừa tắt
+            createSmokePuff?.(targetCoord.x, targetCoord.y);
+        }
+
+        checkAllCandlesBlown?.();
+    }
+)
 
 const blowCandlesAll = withTryCatch(
     // Hàm này dùng để dập tắt tất cả 3 ngọn nến trên bánh sinh nhật cùng một lúc

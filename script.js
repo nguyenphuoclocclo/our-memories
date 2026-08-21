@@ -245,6 +245,9 @@ class FloatingOrb {
         this.element.addEventListener('mouseleave', () => { this.isHovered = false; });
         this.element.addEventListener('touchstart', () => { this.isHovered = true; }, { passive: true });
 
+        this.element.addEventListener('touchend', () => { this.isHovered = false; });
+        this.element.addEventListener('touchcancel', () => { this.isHovered = false; });
+
         // Bắt sự kiện khi người dùng click vào quả cầu:
         this.element.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -258,24 +261,36 @@ class FloatingOrb {
         this.updatePosition();
     }
 
+    // Hàm này tính toán vị trí và trạng thái chuyển động của một vật thể trôi nổi  (ví dụ: quả cầu/kỷ niệm) trong mỗi khung hình animation (thường được gọi liên tục qua requestAnimationFrame)
     update() {
-        if (this.isCollected) return;
+        if (this.isCollected || !this.element) return;
 
         // Tạm dừng di chuyển khi rê chuột vào -> Mượt mà tuyệt đối
+        // Khi người dùng rê chuột vào quả cầu (isHovered === true), vật thể sẽ tạm dừng trôi, giúp người dùng dễ dàng nhấp chuột/chạm mà không lo vật thể bị trôi mất
         if (!this.isHovered) {
             this.x += this.vx;
             this.y += this.vy;
             this.phase += 0.03;
         }
 
+        // + Tính toán độ lệch lượn sóng
+        // - Math.sin(this.phase): Trả về một giá trị dao động tuần hoàn êm ái trong khoảng từ -1.0 đến 1.0
+        // - * 0.5: Thu nhỏ biên độ dao động lại một nửa để chuyển động nhấp nhô trông tự nhiên, nhẹ nhàng
+        // Giá trị sinOffset này sẽ tạo hiệu ứng bập bềnh tựa như quả cầu đang trôi trên mặt nước
         const sinOffset = Math.sin(this.phase) * 0.5;
 
-        // Bật nảy khi chạm mép màn hình
-        const minY = 160; // Ngay dưới header
-        const maxY = Math.max(minY + 50, window.innerHeight - 60);
-        const minX = 15;
-        const maxX = Math.max(minX + 50, window.innerWidth - this.element.offsetWidth - 15);
+        const orbWidth = this.element.offsetWidth || this.width || 180;
 
+        // Xác định vùng giới hạn di chuyển (Boundary Box)
+        const minY = 160; // Ngay dưới header. Đảm bảo quả cầu không trôi đè lên khu vực Header của trang web
+        const maxY = Math.max(minY + 50, window.innerHeight - 60); // Giới hạn cách mép dưới màn hình 60px
+        const minX = 15; // Cách lề trái màn hình 15px
+        const maxX = Math.max(minX + 50, window.innerWidth - orbWidth - 15); // Lấy chiều rộng màn hình trừ đi kích thước thực tế của phần tử (this.element.offsetWidth) và lề 15px
+
+        // Xử lý bật nảy khi chạm mép màn hình (Bounce Logic)
+        // Khi tọa độ X hoặc Y vượt quá ranh giới cho phép:
+        // - Khóa vị trí về đúng mép boundary (ví dụ: this.x = minX): Tránh hiện tượng vật thể bị lọt hẳn ra ngoài màn hình hoặc bị kẹt biên
+        // - Đảo chiều vận tốc (this.vx *= -1 hoặc this.vy *= -1): Đổi dấu vận tốc từ dương sang âm hoặc ngược lại, tạo ra hiệu ứng phản xạ/bật nảy lại ngay lập tức
         if (this.x <= minX) { this.x = minX; this.vx *= -1; }
         if (this.x >= maxX) { this.x = maxX; this.vx *= -1; }
         if (this.y <= minY) { this.y = minY; this.vy *= -1; }

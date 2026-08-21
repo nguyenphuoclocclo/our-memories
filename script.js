@@ -522,7 +522,7 @@ if (secretHeartEl) {
         };
 
         if (heartClickCount === 5) {
-            updateModalContent?.(data, { action: "add" })
+            updateModalContent?.(data, { action: "add" });
             activeMemoryIndex = null; // Không tính thu thập orb
             heartClickCount = 0;
         }
@@ -910,17 +910,52 @@ const createConfetti = withTryCatch(
     }
 );
 
-function renderParticles() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    particles.forEach((p, index) => {
-        p.update();
-        p.draw();
-        if (p.alpha <= 0) {
-            particles.splice(index, 1);
+let particleAnimationFrameId = null;
+
+const renderParticles = withTryCatch(
+    function renderParticles() {
+        if (!ctx || !canvas) return;
+
+        // Xóa toàn bộ nội dung của Canvas ở khung hình (frame) cũ
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Lỗi bỏ sót phần tử (Skipping Element Bug) khi dùng splice trong forEach. Khi bạn xóa phần tử ở chỉ số index bằng splice(index, 1), các phần tử phía sau sẽ bị dồn lên trước (chỉ số của chúng giảm đi 1).
+        // Tuy nhiên, vòng lặp forEach vẫn sẽ chuyển sang chỉ số tiếp theo index + 1. Kết quả là phần tử nằm ngay sau phần tử vừa bị xóa sẽ bị bỏ qua (không được update() và draw() ở khung hình đó), dẫn đến hiện tượng hạt bị giật hoặc nhấp nháy
+
+        // Duyệt ngược từ cuối mảng về đầu mảng để an toàn khi splice (Để khi xóa phần tử ở cuối mảng, chỉ số của các phần tử phía trước không bị xáo trộn)
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+
+            if (!p || typeof p.update !== 'function' || typeof p.draw !== 'function') {
+                particles.splice(i, 1);
+                continue;
+            }
+
+            p.update();
+            p.draw();
+
+            // Nếu hạt đã mờ hoàn toàn xóa hạt khỏi mảng
+            if (p.alpha <= 0) {
+                particles.splice(i, 1);
+            }
         }
-    });
-    requestAnimationFrame(renderParticles);
-}
+
+        if (particles?.length > 0) {
+            particleAnimationFrameId = requestAnimationFrame(renderParticles);
+        } else {
+            stopParticles();
+        }
+    }
+);
+
+const stopParticles = withTryCatch(
+    function stopParticles() {
+        if (particleAnimationFrameId) {
+            cancelAnimationFrame(particleAnimationFrameId);
+            particleAnimationFrameId = null;
+        }
+    }
+);
 
 // ==========================================
 // 9. NỀN VŨ TRỤ SAO LẤP LÁNH

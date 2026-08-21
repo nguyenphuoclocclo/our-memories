@@ -591,20 +591,45 @@ const checkUnlockVideo = withTryCatch(
     }
 );
 
-function createSmokePuff(svgX, svgY) {
-    const cakeBox = document.querySelector('.cake-container').getBoundingClientRect();
-    const posX = cakeBox.left + (svgX / 200) * cakeBox.width;
-    const posY = cakeBox.top + (svgY / 180) * cakeBox.height;
+const createSmokePuff = withTryCatch(
+    // Hàm này dùng để tạo hiệu ứng các làn khói mờ bốc lên tại vị trí đầu ngọn nến khi nến trên chiếc bánh sinh nhật bị thổi tắt
+    function createSmokePuff(svgX, svgY) {
+        const cakeContainer = document.querySelector('.cake-container');
+        if (!cakeContainer) return;
 
-    for (let i = 0; i < 4; i++) {
-        const smoke = document.createElement('div');
-        smoke.className = 'smoke';
-        smoke.style.left = (posX + (Math.random() - 0.5) * 15) + 'px';
-        smoke.style.top = posY + 'px';
-        document.body.appendChild(smoke);
-        setTimeout(() => smoke.remove(), 1500);
+        const cakeBox = cakeContainer.getBoundingClientRect();
+        if (!cakeBox) return;
+
+        if (typeof svgX !== 'number' || typeof svgY !== 'number' || Number.isNaN(svgX) || Number.isNaN(svgY)) return;
+
+        // Ngọn nến có tọa độ (svgX, svgY) nằm trong khung vẽ đồ họa SVG có kích thước cố định là 200 x 180. Nhưng hạt khói lại là một thẻ HTML được dán trực tiếp lên toàn bộ màn hình
+
+        // Cách tính quy đổi (posX) (Áp dụng tương tự cho posY)
+        // - 1) (svgX / 200): Tính xem ngọn nến chiếm bao nhiêu % chiều rộng của khung SVG
+        // - 2) * cakeBox.width: Nhân % đó với chiều rộng thực tế của chiếc bánh trên màn hình
+        // - 3) + cakeBox.left: Cộng thêm khoảng cách từ mép trái màn hình đến chiếc bánh
+
+        // Ví dụ dễ hiểu: Giả sử chiếc bánh SVG có chiều rộng cố định là 200. Ngọn nến nằm ở vị trí svgX = 100 (đúng chính giữa chiếc bánh). Khi hiển thị trên điện thoại, chiếc bánh phóng to ra rộng 400px và nằm cách mép trái màn hình 20px:
+        // - Tỷ lệ: 100 / 200 = 0.5 (nằm ở 50% chiếc bánh).
+        // - Vị trí ngọn nến trên điện thoại: 20 + (0.5 * 400) = 220px
+        const posX = cakeBox.left + (svgX / 200) * cakeBox.width;
+        const posY = cakeBox.top + (svgY / 180) * cakeBox.height;
+
+        for (let i = 0; i < 4; i++) {
+            const smoke = document.createElement('div');
+            smoke.className = 'smoke';
+
+            // Giúp 4 hạt khói không bị chồng khít lên nhau tại 1 điểm duy nhất, mà bị lệch nhẹ sang trái/phải ngẫu nhiên xung quanh ngọn nến
+            smoke.style.left = (posX + (Math.random() - 0.5) * 15) + 'px';
+
+            smoke.style.top = posY + 'px';
+            document.body.appendChild(smoke);
+
+            // Hẹn giờ sau 1.5 giây sẽ tự động xóa thẻ khói khỏi bộ nhớ trang web
+            setTimeout(() => smoke.remove(), 1500);
+        }
     }
-}
+);
 
 // ==========================================
 // 7. GIAI ĐOẠN 3 & CHUYỂN STAGE

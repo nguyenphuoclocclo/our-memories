@@ -206,10 +206,6 @@ class FloatingOrb {
         this.element.className = 'floating-orb';
 
         // Chèn nội dung HTML vào trong quả cầu
-        // Example:
-        // <div class="floating-orb">
-        // <div class="orb-inner">🎈 Sinh nhật 20 tuổi</div>
-        // </div>
         this.element.innerHTML = `<div class="orb-inner">${data.icon} ${data.label}</div>`;
 
         // Vị trí xuất phát ngẫu nhiên
@@ -372,14 +368,12 @@ function initFloatingOrbs() {
     }
 
 
-    // Tránh việc khi khởi tạo lại (hoặc gọi lại hàm này), các quả cầu cũ vẫn còn trên màn hình bị đè thêm quả cầu mới
     floatingArea.innerHTML = '';
 
     floatingOrbs = memoriesData?.filter(data => data && typeof data === 'object').map((data, index) => new FloatingOrb(data, index));
 
-    // Reset bộ đếm số quả cầu đã thu thập
     collectedCount = 0;
-    // Gọi updateTrackerUI() để cập nhật con số 0 này lên giao diện hiển thị người dùng
+
     updateTrackerUI();
 }
 
@@ -395,24 +389,19 @@ const updateTrackerUI = withTryCatch(
         const totalCountEl = document.getElementById('totalCount');
         const progressFillEl = document.getElementById('progressFill');
 
-        // Kiểm tra memoriesData có hợp lệ không, tránh lỗi .length trên null/undefined
         const total = (Array.isArray(memoriesData) && memoriesData.length > 0) ? memoriesData.length : 0;
 
-        // Đảm bảo collectedCount là số hợp lệ, không bị NaN hay âm
         const safeCollected = Math.max(0, Number(collectedCount) || 0);
 
-        // Cập nhật text giao diện nếu phần tử DOM tồn tại
         if (collectedCountEl) collectedCountEl.innerText = safeCollected;
         if (totalCountEl) totalCountEl.innerText = total;
 
-        // Tính phần trăm an toàn, chống chia cho 0 (Infinity) và clamp trong khoảng [0, 100]
         let pct = 0;
         if (total > 0) {
             const rawPct = (safeCollected / total) * 100;
             pct = Math.min(100, Math.max(0, rawPct));
         }
 
-        // Cập nhật độ rộng cho thanh tiến độ
         if (progressFillEl) {
             progressFillEl.style.width = `${pct}%`;
         }
@@ -438,12 +427,10 @@ const openMemoryModal = withTryCatch(
         // Cập nhật chỉ số ký ức đang xem để hàm closeMemoryModal xử lý nổ quả cầu
         activeMemoryIndex = safeIndex;
 
-        // Hiển thị Modal lên màn hình
         memoryModalEl.classList.add('active');
     }
 );
 
-// Quản lý timer chuyển stage an toàn với clearTimeout
 let stageTransitionTimer = null;
 
 function cancelStageTransition() {
@@ -822,7 +809,6 @@ const createConfetti = withTryCatch(
     function createConfetti() {
         if (!canvas || !ctx || isInvalidArray(particles, undefined, false)) return;
 
-        // Giới hạn số lượng hạt tối đa đang tồn tại cùng lúc để tránh lag
         if (particles.length > 400) return;
 
         const colors = ['#ff4b8b', '#ff7eb3', '#ffd700', '#60a5fa', '#a7f3d0', '#ffffff'];

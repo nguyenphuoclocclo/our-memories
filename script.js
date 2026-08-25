@@ -853,11 +853,11 @@ if (canvas) {
 class Particle {
     constructor(x, y, color) {
         // Vị trí khởi tạo: Tọa độ ban đầu nơi hạt sinh ra trên Canvas
-        this.x = x;
-        this.y = y;
+        this.x = typeof x === 'number' && !Number.isNaN(x) ? x : 0;
+        this.y = typeof y === 'number' && !Number.isNaN(y) ? y : 0;
 
         // Màu sắc: Màu của hạt 
-        this.color = color;
+        this.color = color || '#ffffff';
 
         // Bán kính hạt (tính bằng pixel)
         // Tạo ra các hạt to nhỏ khác nhau giúp chùm pháo hoa tự nhiên, không bị cứng nhắc đồng khuôn
@@ -884,18 +884,39 @@ class Particle {
     update() {
         this.x += this.vx;
         this.y += this.vy;
-        this.vy += this.gravity;
-        this.alpha -= this.decay;
+        this.vy += this.gravity; // Tác động trọng lực: tăng vận tốc rơi xuống Y
+        this.alpha -= this.decay; // Giảm độ rõ: hạt mờ dần theo thời gian
     }
 
-    draw() {
-        ctx.save();
-        ctx.globalAlpha = Math.max(0, this.alpha);
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
+    draw(context = ctx) {
+        if (!context) return;
+
+        const safeAlpha = Math.min(1, Math.max(0, this.alpha || 0));
+        const safeSize = Math.max(0, this.size || 0);
+
+        // Lưu lại toàn bộ trạng thái (state) hiện tại của Canvas Context vào một ngăn xếp (stack). Nó không lưu nội dung hình ảnh đã vẽ, chỉ lưu các thiết lập vẽ
+        // Lưu trạng thái hiện tại của Canvas Context (hệ tọa độ, góc quay, tỉ lệ, kiểu vẽ...) để có thể khôi phục
+        context.save();
+        
+        context.globalAlpha = safeAlpha;  // Đảm bảo độ mờ không bị âm (< 0)
+
+        context.fillStyle = this.color; // Chọn màu vẽ
+        
+        // - Là lệnh dùng để tạo mới một tập hợp các đường nét vẽ (Path mới) và xóa bỏ danh sách các đường nét vẽ cũ đang lưu trong bộ nhớ tạm của Canvas
+        // - Nếu bạn không gọi context.beginPath() trước khi vẽ hạt mới, Canvas sẽ giữ lại danh sách nét vẽ của tất cả các hạt đã vẽ trước đó!
+        context.beginPath();
+        
+        context.arc(this.x, this.y, safeSize, 0, Math.PI * 2); // Vẽ đường tròn tâm (x,y), bán kính size
+
+        // - Canvas làm việc theo cơ chế "Danh sách lưu đường nét" (Current Path Registry):
+        // - 1) Khi bạn gọi các lệnh tạo hình như arc(), lineTo(), rect(), Canvas chưa thực sự tô màu lên màn hình ngay. Nó chỉ mới ghi danh sách các tọa độ nét vẽ đó vào danh sách Current Path
+        // - 2) Chỉ đến khi bạn gọi lệnh context.fill() (tô màu khối) hoặc context.stroke() (vẽ nét viền), Canvas mới thực sự đổ màu lên toàn bộ các nét vẽ đang nằm trong Current Path
+        context.fill(); 
+
+        // Khôi phục trạng thái Canvas gần nhất đã được lưu bằng save(). Sau restore() mọi thứ quay trở về: Origin = (0,0), Rotation = 0°, Scale = 1
+        // Như chưa từng translate() hay rotate(). save() và restore() hoạt động theo Stack. restore() luôn lấy trạng thái ở trên cùng của stack
+        // VD: Bạn chỉ muốn: Background => Photo quay 180° => Text bình thường. Nếu bỏ restore() thì: Background => Photo quay 180° => Text cũng quay
+        context.restore();
     }
 }
 

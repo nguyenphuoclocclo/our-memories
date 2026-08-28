@@ -645,8 +645,10 @@ const cutCake = withTryCatch(
             window.innerWidth / 2,
             window.innerHeight / 2,
             40,
-            ['#ff7eb3', '#ffd700', '#ffffff']
+            ['#ff7eb3', '#ffd700', '#ffffff', '#60a5fa', '#a7f3d0']
         );
+
+        createConfetti?.();
 
         showToast("🍰 Cắt bánh thành công! Chúc mừng sinh nhật tràn ngập niềm vui! 🎉");
 
@@ -849,9 +851,9 @@ if (canvas) {
     resizeCanvas();
 }
 
-// Particle (Hạt) là một mẫu thiết kế (Blueprint) đại diện cho 1 hạt pháo hoa / hạt hoa giấy lẻ
+// Particle (Hạt) đại diện cho 1 hạt pháo hoa / dải ribbon / hạt hoa giấy
 class Particle {
-    constructor(x, y, color) {
+    constructor(x, y, color, shape = 'circle') {
         // Vị trí khởi tạo: Tọa độ ban đầu nơi hạt sinh ra trên Canvas
         this.x = typeof x === 'number' && !Number.isNaN(x) ? x : 0;
         this.y = typeof y === 'number' && !Number.isNaN(y) ? y : 0;
@@ -859,9 +861,20 @@ class Particle {
         // Màu sắc: Màu của hạt 
         this.color = color || '#ffffff';
 
-        // Bán kính hạt (tính bằng pixel)
+        // Kiểu dáng: 'circle', 'ribbon', 'rect'
+        this.shape = shape;
+
+        // Bán kính / Kích thước hạt (tính bằng pixel)
         // Tạo ra các hạt to nhỏ khác nhau giúp chùm pháo hoa tự nhiên, không bị cứng nhắc đồng khuôn
         this.size = Math.random() * 6 + 3;
+
+        // Kích thước dải ribbon / chữ nhật
+        this.width = Math.random() * 8 + 4;
+        this.height = Math.random() * 12 + 6;
+
+        // Góc xoay và tốc độ xoay (tạo hiệu ứng ribbon chao đảo khi rơi)
+        this.rotation = Math.random() * Math.PI * 2;
+        this.rotationSpeed = (Math.random() - 0.5) * 0.2;
 
         // Vận tốc ngang (X-axis velocity): Dấu âm (-) là hạt bắn sang trái, dấu dương (+) là hạt bắn sang phải
         this.vx = (Math.random() - 0.5) * 8;
@@ -885,6 +898,7 @@ class Particle {
         this.x += this.vx;
         this.y += this.vy;
         this.vy += this.gravity; // Tác động trọng lực: tăng vận tốc rơi xuống Y
+        this.rotation += this.rotationSpeed;
         this.alpha -= this.decay; // Giảm độ rõ: hạt mờ dần theo thời gian
     }
 
@@ -897,21 +911,26 @@ class Particle {
         // Lưu lại toàn bộ trạng thái (state) hiện tại của Canvas Context vào một ngăn xếp (stack). Nó không lưu nội dung hình ảnh đã vẽ, chỉ lưu các thiết lập vẽ
         // Lưu trạng thái hiện tại của Canvas Context (hệ tọa độ, góc quay, tỉ lệ, kiểu vẽ...) để có thể khôi phục
         context.save();
-        
+
         context.globalAlpha = safeAlpha;  // Đảm bảo độ mờ không bị âm (< 0)
 
         context.fillStyle = this.color; // Chọn màu vẽ
-        
-        // - Là lệnh dùng để tạo mới một tập hợp các đường nét vẽ (Path mới) và xóa bỏ danh sách các đường nét vẽ cũ đang lưu trong bộ nhớ tạm của Canvas
-        // - Nếu bạn không gọi context.beginPath() trước khi vẽ hạt mới, Canvas sẽ giữ lại danh sách nét vẽ của tất cả các hạt đã vẽ trước đó!
-        context.beginPath();
-        
-        context.arc(this.x, this.y, safeSize, 0, Math.PI * 2); // Vẽ đường tròn tâm (x,y), bán kính size
+        context.translate(this.x, this.y);
+        context.rotate(this.rotation);
 
-        // - Canvas làm việc theo cơ chế "Danh sách lưu đường nét" (Current Path Registry):
-        // - 1) Khi bạn gọi các lệnh tạo hình như arc(), lineTo(), rect(), Canvas chưa thực sự tô màu lên màn hình ngay. Nó chỉ mới ghi danh sách các tọa độ nét vẽ đó vào danh sách Current Path
-        // - 2) Chỉ đến khi bạn gọi lệnh context.fill() (tô màu khối) hoặc context.stroke() (vẽ nét viền), Canvas mới thực sự đổ màu lên toàn bộ các nét vẽ đang nằm trong Current Path
-        context.fill(); 
+        if (this.shape === 'ribbon' || this.shape === 'rect') {
+            context.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
+        } else {
+            const safeSize = Math.max(0, this.size || 0);
+            // - Là lệnh dùng để tạo mới một tập hợp các đường nét vẽ (Path mới) và xóa bỏ danh sách các đường nét vẽ cũ đang lưu trong bộ nhớ tạm của Canvas
+            // - Nếu bạn không gọi context.beginPath() trước khi vẽ hạt mới, Canvas sẽ giữ lại danh sách nét vẽ của tất cả các hạt đã vẽ trước đó!
+            context.beginPath();
+            context.arc(0, 0, safeSize, 0, Math.PI * 2);
+            // - Canvas làm việc theo cơ chế "Danh sách lưu đường nét" (Current Path Registry):
+            // - 1) Khi bạn gọi các lệnh tạo hình như arc(), lineTo(), rect(), Canvas chưa thực sự tô màu lên màn hình ngay. Nó chỉ mới ghi danh sách các tọa độ nét vẽ đó vào danh sách Current Path
+            // - 2) Chỉ đến khi bạn gọi lệnh context.fill() (tô màu khối) hoặc context.stroke() (vẽ nét viền), Canvas mới thực sự đổ màu lên toàn bộ các nét vẽ đang nằm trong Current Path
+            context.fill();
+        }
 
         // Khôi phục trạng thái Canvas gần nhất đã được lưu bằng save(). Sau restore() mọi thứ quay trở về: Origin = (0,0), Rotation = 0°, Scale = 1
         // Như chưa từng translate() hay rotate(). save() và restore() hoạt động theo Stack. restore() luôn lấy trạng thái ở trên cùng của stack
@@ -919,6 +938,15 @@ class Particle {
         context.restore();
     }
 }
+
+// Kích hoạt lại vòng lặp render particles nếu nó chưa chạy
+const startParticleLoop = withTryCatch(
+    function startParticleLoop() {
+        if (!particleAnimationFrameId && canvas && ctx) {
+            particleAnimationFrameId = requestAnimationFrame(renderParticles);
+        }
+    }
+);
 
 // Hàm này có nhiệm vụ tạo ra một hiệu ứng bùng nổ hạt (Particle Burst / Explosion Effect) tại một vị trí tọa độ (x, y) xác định trên màn hình (HTML5 Canvas)
 // Mỗi khi hàm này được gọi (ví dụ: khi người dùng nhấp chuột, hoàn thành nhiệm vụ, mở hiệu ứng chúc mừng...), nó sẽ sinh ra một loạt các hạt nhỏ với màu sắc ngẫu nhiên và thêm chúng vào mảng quản lý hạt particles
@@ -935,19 +963,22 @@ function createBurstParticles(x, y, count = 20, colors = ['#ff4b8b', '#ffd700', 
 
     for (let i = 0; i < safeCount; i++) {
         const color = colors[Math.floor(Math.random() * colors.length)];
+        const shape = Math.random() > 0.6 ? 'rect' : 'circle';
         // Mỗi hạt khi khởi tạo sẽ tự gán cho mình một vận tốc ngẫu nhiên vx (ngang) và vy (dọc) để khi vẽ ra, các hạt sẽ bay tỏa ra mọi hướng tạo thành hiệu ứng "bùng nổ" (burst)
-        particles.push(new Particle(x, y, color));
+        particles.push(new Particle(x, y, color, shape));
     }
+
+    startParticleLoop();
 }
 
-// Hàm này có nhiệm vụ tạo ra một cơn mưa hoa giấy/pháo giấy (Confetti Burst) bao gồm 80 mảnh pháo giấy với nhiều màu sắc rực rỡ, xuất hiện ngẫu nhiên ở phía trên cùng màn hình và bồng bềnh rơi xuống dưới
+// Hàm này có nhiệm vụ tạo ra một cơn mưa hoa giấy/pháo giấy/ribbon (Confetti Burst) // Mỗi hạt khi khởi tạo sẽ tự gán cho mình một vận tốc ngẫu nhiên vx (ngang) và vy (dọc) để khi vẽ ra, các hạt sẽ bay tỏa ra mọi hướng tạo thành hiệu ứng "bùng nổ" (burst)
 const createConfetti = withTryCatch(
     function createConfetti() {
         if (!canvas || !ctx || isInvalidArray(particles, undefined, false)) return;
 
         if (particles.length > 400) return;
 
-        const colors = ['#ff4b8b', '#ff7eb3', '#ffd700', '#60a5fa', '#a7f3d0', '#ffffff'];
+        const colors = ['#ff4b8b', '#ff7eb3', '#ffd700', '#60a5fa', '#a7f3d0', '#ffffff', '#ec4899'];
         const width = canvas.width || window.innerWidth;
 
         for (let i = 0; i < 80; i++) {
@@ -957,11 +988,13 @@ const createConfetti = withTryCatch(
             // Tọa độ Y bắt đầu ẩn ở phía trên đỉnh màn hình (10px bên ngoài viewport)
             // Các hạt bắt đầu ở vị trí bên ngoài tầm mắt phía trên màn hình. Khi rơi xuống, người dùng sẽ thấy hoa giấy xuất hiện tự nhiên từ trên trời rơi xuống chứ không đột ngột hiện ra giữa màn hình
             const y = -10;
+            const shape = Math.random() > 0.3 ? 'ribbon' : 'circle';
 
             const p = new Particle(
                 x,
                 y,
-                colors[Math.floor(Math.random() * colors.length)]
+                colors[Math.floor(Math.random() * colors.length)],
+                shape
             );
 
             // Gán các thông số vật lý tùy chỉnh cho hiệu ứng pháo giấy rơi
@@ -989,6 +1022,8 @@ const createConfetti = withTryCatch(
 
             particles.push(p);
         }
+
+        startParticleLoop();
     }
 );
 
@@ -1024,6 +1059,8 @@ const renderParticles = withTryCatch(
 
         if (particles?.length > 0) {
             particleAnimationFrameId = requestAnimationFrame(renderParticles);
+        } else {
+            particleAnimationFrameId = null;
         }
     }
 );

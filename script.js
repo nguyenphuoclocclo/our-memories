@@ -971,7 +971,7 @@ function createBurstParticles(x, y, count = 20, colors = ['#ff4b8b', '#ffd700', 
     startParticleLoop();
 }
 
-// Hàm này có nhiệm vụ tạo ra một cơn mưa hoa giấy/pháo giấy/ribbon (Confetti Burst) // Mỗi hạt khi khởi tạo sẽ tự gán cho mình một vận tốc ngẫu nhiên vx (ngang) và vy (dọc) để khi vẽ ra, các hạt sẽ bay tỏa ra mọi hướng tạo thành hiệu ứng "bùng nổ" (burst)
+// Hàm này có nhiệm vụ tạo ra một cơn mưa hoa giấy/pháo giấy/ribbon (Confetti Burst) bao gồm 80 mảnh pháo giấy với nhiều màu sắc rực rỡ, xuất hiện ngẫu nhiên ở phía trên cùng màn hình và bồng bềnh rơi xuống dưới
 const createConfetti = withTryCatch(
     function createConfetti() {
         if (!canvas || !ctx || isInvalidArray(particles, undefined, false)) return;

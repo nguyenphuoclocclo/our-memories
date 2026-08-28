@@ -230,7 +230,7 @@
                             <!-- Miếng bánh rời (một góc bánh) hoàn chỉnh, được vẽ riêng để JavaScript/CSS có thể dùng transform: translate(x, y) kéo nó trượt ra ngoài -->
                             <g class="slice-piece">
                                 <!-- Slice base layer (Thân tầng dưới) -->
-                                <!-- Đường cong mép ngoài của tầng đáy miếng bánh (từ x = 145 đến 195) -->
+                                <!-- Thịt bánh dưới: Đường cong mép ngoài của tầng đáy miếng bánh (từ x = 145 đến 195) -->
                                 <path d="M 145,116 Q 170,123 195,125 L 195,156 Q 170,154 145,147 Z" fill="#6d3a29" />
                                 <!-- Kem giữa tầng dưới (Đoạn kem kẹp giữa phần thân dưới của miếng cắt) -->
                                 <path d="M 145,116 Q 170,123 195,125 L 195,132 Q 170,130 145,123 Z" fill="#ff7eb3" />
@@ -240,10 +240,10 @@
                                 <path d="M 142,80 Q 166,83 190,85 L 190,125 Q 166,123 142,116 Z" fill="#844531" />
 
                                 <!-- Slice top surface (Mặt trên của miếng bánh) -->
-                                <!-- Một hình quạt cong 2.5D có đỉnh tại tâm $(120, 85)$ xòe ra mép ngoài $(190, 85)$, tạo thành mặt phẳng trên cùng của miếng bánh -->
+                                <!-- Một hình quạt cong 2.5D có đỉnh tại tâm (120, 85) xòe ra mép ngoài (190, 85), tạo thành mặt phẳng trên cùng của miếng bánh -->
                                 <path d="M 120,85 Q 155,75 190,85 Q 155,95 120,85 Z" fill="#ffb199" />
 
-                                <!-- Slice frosting drip -->
+                                <!-- Slice frosting drip (Kem chảy trên miếng bánh) -->
                                 <!-- Gồm 2 giọt kem chảy chúc xuống (y=100 và y=102) phủ dọc theo mép ngoài miếng bánh -->
                                 <path d="M 142,80 Q 158,100 170,88 Q 180,102 190,85 Q 160,78 142,80 Z" fill="#fff5f8" />
 

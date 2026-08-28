@@ -212,26 +212,46 @@
                         </g>
 
                         <!-- CUT WEDGE SLICE (Tách ra khi cắt bánh) -->
+                        <!-- Chứa toàn bộ các thành phần phục vụ cho hiệu ứng cắt rời một miếng bánh tam giác (wedge slice) ra khỏi chiếc bánh chính -->
+                        <!-- Cụm này được chia làm hai phần: Mặt cắt bên trong còn lại trên thân bánh và Miếng bánh rời được tách ra -->
                         <g id="cakeSliceGroup" class="cake-slice-group">
                             <!-- Inner Cake Sponge Side Wall (Cross section exposed on cut) -->
+                            <!-- Vách cắt bên trong -->
+                            <!-- Mô phỏng phần thịt bánh lộ ra bên trong thân bánh lớn sau khi miếng bánh đã bị lấy đi -->
+                            <!-- Một hình bình hành nghiêng chạy từ tâm bánh ra mép ngoài, sâu xuống đáy bánh -->
                             <path class="slice-inner-wall" d="M 120,85 L 160,77 L 160,145 L 120,157 Z"
                                 fill="url(#cakeInnerSponge)" opacity="0" />
+                            <!-- Lớp kem kẹp ở mặt cắt -->
+                            <!-- Dải màu mỏng cao nằm ngay giữa vách cắt, khớp với vị trí của lớp kem kẹp giữa hai tầng bánh -->
                             <path class="slice-inner-cream" d="M 120,120 L 160,112 L 160,118 L 120,126 Z" fill="#ff7eb3"
                                 opacity="0" />
 
                             <!-- Sliced Cake Wedge Piece -->
+                            <!-- Miếng bánh rời (một góc bánh) hoàn chỉnh, được vẽ riêng để JavaScript/CSS có thể dùng transform: translate(x, y) kéo nó trượt ra ngoài -->
                             <g class="slice-piece">
-                                <!-- Slice base layer -->
+                                <!-- Slice base layer (Thân tầng dưới) -->
+                                <!-- Đường cong mép ngoài của tầng đáy miếng bánh (từ x = 145 đến 195) -->
                                 <path d="M 145,116 Q 170,123 195,125 L 195,156 Q 170,154 145,147 Z" fill="#6d3a29" />
+                                <!-- Kem giữa tầng dưới (Đoạn kem kẹp giữa phần thân dưới của miếng cắt) -->
                                 <path d="M 145,116 Q 170,123 195,125 L 195,132 Q 170,130 145,123 Z" fill="#ff7eb3" />
-                                <!-- Slice top layer -->
+
+                                <!-- Slice top layer (Thân tầng trên) -->
+                                <!-- Phần vỏ ngoài của tầng trên miếng bánh -->
                                 <path d="M 142,80 Q 166,83 190,85 L 190,125 Q 166,123 142,116 Z" fill="#844531" />
-                                <!-- Slice top surface -->
+
+                                <!-- Slice top surface (Mặt trên của miếng bánh) -->
+                                <!-- Một hình quạt cong 2.5D có đỉnh tại tâm $(120, 85)$ xòe ra mép ngoài $(190, 85)$, tạo thành mặt phẳng trên cùng của miếng bánh -->
                                 <path d="M 120,85 Q 155,75 190,85 Q 155,95 120,85 Z" fill="#ffb199" />
+
                                 <!-- Slice frosting drip -->
+                                <!-- Gồm 2 giọt kem chảy chúc xuống (y=100 và y=102) phủ dọc theo mép ngoài miếng bánh -->
                                 <path d="M 142,80 Q 158,100 170,88 Q 180,102 190,85 Q 160,78 142,80 Z" fill="#fff5f8" />
+
                                 <!-- Strawberry on slice -->
+                                <!-- Topping dâu tây trên miếng cắt -->
+                                <!-- Thân dâu -->
                                 <circle cx="160" cy="76" r="7" fill="#ff4b8b" />
+                                <!-- Đốm sáng bóng -->
                                 <circle cx="160" cy="73" r="2" fill="#fff" opacity="0.6" />
                             </g>
                         </g>

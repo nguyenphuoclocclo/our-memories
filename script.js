@@ -864,16 +864,24 @@ class Particle {
         // Kiểu dáng: 'circle', 'ribbon', 'rect'
         this.shape = shape;
 
-        // Bán kính / Kích thước hạt (tính bằng pixel)
-        // Tạo ra các hạt to nhỏ khác nhau giúp chùm pháo hoa tự nhiên, không bị cứng nhắc đồng khuôn
-        this.size = Math.random() * 6 + 3;
+        if (this.shappe === "ribbon" && this.shape === "rect") {
+            // Kích thước dải ribbon / chữ nhật
+            this.width = Math.random() * 8 + 4;
+            this.height = Math.random() * 12 + 6;
+        } else {
+            // Bán kính / Kích thước hạt (tính bằng pixel)
+            // Tạo ra các hạt to nhỏ khác nhau giúp chùm pháo hoa tự nhiên, không bị cứng nhắc đồng khuôn
+            this.size = Math.random() * 6 + 3;
+        }
 
-        // Kích thước dải ribbon / chữ nhật
-        this.width = Math.random() * 8 + 4;
-        this.height = Math.random() * 12 + 6;
 
         // Góc xoay và tốc độ xoay (tạo hiệu ứng ribbon chao đảo khi rơi)
+        // Các hạt pháo hoa / dải ribbon / hạt hoa giấy không bị cùng đứng thẳng theo 1 trục mà mỗi mảnh sẽ nghiêng ngả ở một góc tự do khác nha
         this.rotation = Math.random() * Math.PI * 2;
+
+        // - Nếu âm (< 0): Hạt tự xoay ngược chiều kim đồng hồ
+        // - Nếu dương (> 0): Hạt tự xoay thuận chiều kim đồng hồ
+        // Kết quả: Hạt thì xoay nhanh, hạt thì xoay chậm hoặc xoay khác hướng, tạo hiệu ứng chao đảo, lượn sóng tự nhiên khi bay trong không khí
         this.rotationSpeed = (Math.random() - 0.5) * 0.2;
 
         // Vận tốc ngang (X-axis velocity): Dấu âm (-) là hạt bắn sang trái, dấu dương (+) là hạt bắn sang phải
@@ -898,7 +906,7 @@ class Particle {
         this.x += this.vx;
         this.y += this.vy;
         this.vy += this.gravity; // Tác động trọng lực: tăng vận tốc rơi xuống Y
-        this.rotation += this.rotationSpeed;
+        this.rotation += this.rotationSpeed; // Các hạt pháo hoa / dải ribbon / hạt hoa giấy sẽ liên tục xoay tròn / lộn nhào khi đang bay hoặc rơi xuống
         this.alpha -= this.decay; // Giảm độ rõ: hạt mờ dần theo thời gian
     }
 
@@ -906,7 +914,6 @@ class Particle {
         if (!context) return;
 
         const safeAlpha = Math.min(1, Math.max(0, this.alpha || 0));
-        const safeSize = Math.max(0, this.size || 0);
 
         // Lưu lại toàn bộ trạng thái (state) hiện tại của Canvas Context vào một ngăn xếp (stack). Nó không lưu nội dung hình ảnh đã vẽ, chỉ lưu các thiết lập vẽ
         // Lưu trạng thái hiện tại của Canvas Context (hệ tọa độ, góc quay, tỉ lệ, kiểu vẽ...) để có thể khôi phục
@@ -915,16 +922,32 @@ class Particle {
         context.globalAlpha = safeAlpha;  // Đảm bảo độ mờ không bị âm (< 0)
 
         context.fillStyle = this.color; // Chọn màu vẽ
+
+        // Dời gốc toạ độ (0, 0) của Canvas từ góc trên bên trái màn hình về chính vị trí tâm của hạt
         context.translate(this.x, this.y);
+
+        // Giúp hạt có hiệu ứng chao liệng, xoay tròn ngẫu nhiên khi rơi
         context.rotate(this.rotation);
 
         if (this.shape === 'ribbon' || this.shape === 'rect') {
+            // - Gốc tọa độ (0,0) hiện đang là tâm của hạt
+            // - Để tâm hình chữ nhật trùng đúng vào điểm (0,0), góc trên bên trái của hình chữ nhật phải lùi về góc âm nửa chiều rộng (-this.width / 2) 
+            // và nửa chiều cao (-this.height / 2). Nhờ vậy khi rotate(), hình chữ nhật sẽ xoay đều quanh tâm của nó thay vì xoay quanh một góc
+
+            // - Các hàm như context.fillRect() và context.strokeRect() là "Direct Drawing Methods" (Vẽ trực tiếp lên màn hình)
+            // - Canvas sẽ tự động tính toán và đổ màu pixel ngay lập tức lên màn hình mà không cần ghi nhớ nét vẽ vào bộ nhớ đệm (Path). Do đó, bạn không cần beginPath() hay fill()
             context.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
         } else {
+            // - Các hàm tạo hình dạng tự do/phức tạp như arc() (vẽ cung tròn/hình tròn), lineTo(), bezierCurveTo(), rect()... không trực tiếp vẽ hay đổ màu mà là "Path-based Drawing Methods" (Vẽ theo đường dẫn/nét vẽ)
+            // - Chúng chỉ đóng vai trò là cây bút chì phác thảo tọa độ vào một danh sách tạm gọi là "Current Path" (đường nét hiện hành)
+
             const safeSize = Math.max(0, this.size || 0);
             // - Là lệnh dùng để tạo mới một tập hợp các đường nét vẽ (Path mới) và xóa bỏ danh sách các đường nét vẽ cũ đang lưu trong bộ nhớ tạm của Canvas
             // - Nếu bạn không gọi context.beginPath() trước khi vẽ hạt mới, Canvas sẽ giữ lại danh sách nét vẽ của tất cả các hạt đã vẽ trước đó!
             context.beginPath();
+
+            // (0, 0): Tâm đường tròn nằm ngay tại gốc tọa độ mới (tâm hạt)
+            // Vẽ một vòng tròn khép kín từ góc 0 radian đến 2π radian (quanh 360 độ)
             context.arc(0, 0, safeSize, 0, Math.PI * 2);
             // - Canvas làm việc theo cơ chế "Danh sách lưu đường nét" (Current Path Registry):
             // - 1) Khi bạn gọi các lệnh tạo hình như arc(), lineTo(), rect(), Canvas chưa thực sự tô màu lên màn hình ngay. Nó chỉ mới ghi danh sách các tọa độ nét vẽ đó vào danh sách Current Path

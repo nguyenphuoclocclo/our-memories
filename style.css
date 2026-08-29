@@ -234,20 +234,19 @@ body {
 
 /* Orb hồng từ từ phát sáng mạnh lên, aura hồng lan rộng và đậm hơn, đồng thời có một lớp ánh sáng trắng nhẹ bên trong; sau đó giảm xuống và lặp lại */
 @keyframes orbGlow {
-  /* Giúp orb trông giống một vật thể có ánh sáng phát ra từ bên trong, thay vì chỉ đơn giản là một hình có shadow */
   0% {
     box-shadow:
-      /* Ánh sáng phát ra bên ngoài element */
+      /* Ánh sáng hồng lan ra bên ngoài element */
       0 0 15px rgba(255, 126, 179, 0.3),
-      /* Ánh sáng phát ra bên trong element */ inset 0 0 10px
-        rgba(255, 255, 255, 0.2);
+      /* Ánh sáng trắng ở phía trong element */
+      inset 0 0 10px rgba(255, 255, 255, 0.2);
   }
   100% {
     box-shadow:
-      /* Ánh sáng phát ra bên ngoài element */
+      /* Ánh sáng hồng lan ra bên ngoài element */
       0 0 30px rgba(255, 75, 139, 0.7),
-      /* Ánh sáng phát ra bên trong element */ inset 0 0 20px
-        rgba(255, 255, 255, 0.4);
+      /* Ánh sáng trắng ở phía trong element */
+      inset 0 0 20px rgba(255, 255, 255, 0.4);
   }
 }
 

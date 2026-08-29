@@ -232,16 +232,22 @@ body {
   animation: orbGlow 3s infinite alternate;
 }
 
+/* Orb hồng từ từ phát sáng mạnh lên, aura hồng lan rộng và đậm hơn, đồng thời có một lớp ánh sáng trắng nhẹ bên trong; sau đó giảm xuống và lặp lại */
 @keyframes orbGlow {
+  /* Giúp orb trông giống một vật thể có ánh sáng phát ra từ bên trong, thay vì chỉ đơn giản là một hình có shadow */
   0% {
     box-shadow:
+      /* Ánh sáng phát ra bên ngoài element */
       0 0 15px rgba(255, 126, 179, 0.3),
-      inset 0 0 10px rgba(255, 255, 255, 0.2);
+      /* Ánh sáng phát ra bên trong element */ inset 0 0 10px
+        rgba(255, 255, 255, 0.2);
   }
   100% {
     box-shadow:
+      /* Ánh sáng phát ra bên ngoài element */
       0 0 30px rgba(255, 75, 139, 0.7),
-      inset 0 0 20px rgba(255, 255, 255, 0.4);
+      /* Ánh sáng phát ra bên trong element */ inset 0 0 20px
+        rgba(255, 255, 255, 0.4);
   }
 }
 
@@ -277,9 +283,12 @@ body {
 
 .cake-container {
   position: relative;
-  width: 260px;
-  height: 240px;
-  margin: 20px 0;
+  width: 280px;
+  height: 250px;
+  margin: 15px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Cake SVG & Layers */
@@ -288,21 +297,130 @@ body {
   height: 100%;
   filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.5));
   transition: transform 0.5s ease;
+  overflow: visible;
 }
 
-.cake-sliced {
-  animation: sliceOpen 0.8s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
+/* Cake Knife Animation */
+.cake-knife {
+  opacity: 0;
+  transform: translate(190px, -60px) rotate(-45deg);
+  pointer-events: none;
+  transform-origin: 0px 8px;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.35));
 }
 
-@keyframes sliceOpen {
+.cake-container.is-cutting .cake-knife {
+  animation: knifeCuttingMotion 1.9s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes knifeCuttingMotion {
   0% {
-    transform: scale(1);
+    opacity: 0;
+    transform: translate(200px, -70px) rotate(-48deg) scale(0.9);
   }
-  50% {
-    transform: scale(1.08) rotate(-3deg);
+  15% {
+    opacity: 1;
+    transform: translate(145px, 20px) rotate(-32deg) scale(1.05);
+  }
+  30% {
+    opacity: 1;
+    transform: translate(138px, 40px) rotate(-22deg) scale(1.05);
+  }
+  48% {
+    opacity: 1;
+    transform: translate(122px, 128px) rotate(-14deg) scale(1);
+  }
+  62% {
+    opacity: 1;
+    transform: translate(120px, 138px) rotate(-12deg) scale(0.98);
+  }
+  78% {
+    opacity: 0.9;
+    transform: translate(145px, 95px) rotate(-26deg) scale(1.02);
   }
   100% {
-    transform: scale(1) translateY(-10px);
+    opacity: 0;
+    transform: translate(230px, 30px) rotate(-38deg) scale(0.9);
+  }
+}
+
+/* Cake Slice Piece Separation */
+.cake-slice-group {
+  transform-origin: 120px 120px;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.slice-piece {
+  transition:
+    transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    filter 0.8s ease;
+  transform-origin: 160px 120px;
+}
+
+.slice-inner-wall,
+.slice-inner-cream {
+  transition: opacity 0.5s ease;
+}
+
+.cake-container.slice-separated .slice-piece {
+  transform: translate(24px, 10px) rotate(4deg);
+  filter: drop-shadow(4px 8px 15px rgba(0, 0, 0, 0.45));
+}
+
+.cake-container.slice-separated .slice-inner-wall,
+.cake-container.slice-separated .slice-inner-cream {
+  opacity: 1;
+}
+
+/* Cut Glistening Seam Line */
+.cut-seam-line {
+  stroke-dasharray: 90;
+  stroke-dashoffset: 90;
+  transition: opacity 0.4s ease;
+}
+
+.cake-container.is-cutting .cut-seam-line,
+.cake-container.slice-separated .cut-seam-line {
+  animation: cutGleam 1.5s ease-out forwards;
+}
+
+@keyframes cutGleam {
+  0% {
+    opacity: 0;
+    stroke-dashoffset: 90;
+  }
+  40% {
+    opacity: 1;
+    stroke-dashoffset: 0;
+    filter: drop-shadow(0 0 6px #ffffff) drop-shadow(0 0 12px #ff7eb3);
+  }
+  75% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0.4;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Cake Crumbs Physics */
+.cake-crumb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 55;
+  animation: crumbFly 0.9s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes crumbFly {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--crumb-vx, 20px), var(--crumb-vy, 30px))
+      scale(0.3);
   }
 }
 
@@ -408,6 +526,51 @@ body {
   cursor: not-allowed;
   transform: none !important;
   box-shadow: none !important;
+}
+
+/* Button Transitions */
+.btn-fade-out {
+  opacity: 0 !important;
+  transform: scale(0.85) translateY(10px) !important;
+  pointer-events: none !important;
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease !important;
+}
+
+.btn-pop-in {
+  animation: btnPopIn 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes btnPopIn {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.pulse {
+  animation: pulseGlow 1.8s infinite ease-in-out;
+}
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    box-shadow:
+      0 6px 20px rgba(121, 40, 202, 0.5),
+      0 0 15px rgba(255, 75, 139, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow:
+      0 10px 30px rgba(121, 40, 202, 0.8),
+      0 0 25px rgba(255, 75, 139, 0.7);
+    transform: scale(1.03);
+  }
 }
 
 /* GIAI ĐOẠN 3: RẠP PHIM VIDEO */

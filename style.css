@@ -313,8 +313,8 @@ body {
 }
 
 /* Dao xuất hiện từ phía trên → lao xuống → nghiêng dần → chạm/cắt bánh → kéo ngược lên → bay ra ngoài → biến mất */
-/* 
-  Mỗi mốc mô tả: 
+/*
+  Mỗi mốc mô tả:
   - dao ở đâu
   - dao xoay bao nhiêu độ
   - dao to/nhỏ bao nhiêu
@@ -328,16 +328,16 @@ body {
 /* 48%: 1.9 × 0.48 = 0.912s */
 /* 62%: 1.9 × 0.62 = 1.178s */
 /* 78%: 1.9 × 0.78 = 1.482s */
-/* 100%: 1.9s  */
+/* 100%: 1.9s */
 /* 
 Vậy timeline thật sự là:
 
-0s      0.285   0.57       0.912    1.178    1.482     1.9s
+0s      0.285   0.57        0.912    1.178     1.482      1.9s
 │---------│-------│-----------│--------│---------│----------│
 0%       15%     30%         48%      62%       78%       100% 
 */
 
-/* 
+/*
   Nếu bỏ qua rotation/scale thì đường đi đại khái:
                      0%
                       🔪
@@ -359,7 +359,7 @@ Vậy timeline thật sự là:
 => Tức là nó không đi theo một đường thẳng. Nó giống: Đi xuống → chạm đáy → giữ → kéo lên → bay sang phải
 */
 
-/* 
+/*
   Nhìn theo từng thuộc tính sẽ còn dễ hiểu hơn
   Vị trí X
     200
@@ -378,7 +378,7 @@ Vậy timeline thật sự là:
   => Có thể đọc: Dao đi từ bên phải → sang trái → tới điểm cắt → rồi quay ngược sang phải
 */
 
-/* 
+/*
   Vị trí Y
     -70
     ↓
@@ -393,10 +393,28 @@ Vậy timeline thật sự là:
     95
     ↑
     30
+  => Có thể đọc: Dao từ phía trên → lao xuống → đạt điểm thấp nhất → rồi bay lên
+*/
+
+/*
+  Rotation
+    -48°
+    ↓
+    -32°
+    ↓
+    -22°
+    ↓
+    -14°
+    ↓
+    -12°
+    ↑
+    -26°
+    ↑
+    -38°
   => Có thể đọc: Dao ban đầu nghiêng nhiều → dần thẳng hơn khi cắt → sau đó nghiêng lại khi rút ra
 */
 
-/* 
+/*
   Scale
     0.9
     ↓
@@ -414,7 +432,7 @@ Vậy timeline thật sự là:
   => Nó tạo cảm giác: Dao xuất hiện hơi nhỏ → phóng to nhẹ → về kích thước bình thường → rồi nhỏ lại khi rời đi
 */
 
-/* 
+/*
   Opacity
     0
     ↓
@@ -429,37 +447,37 @@ Vậy timeline thật sự là:
     0.9
     ↓
     0
-  => Nó tại cảm giác: Dao xuất hiện → giữ độ rõ trong lúc cắt → mờ dần → biến mất
+  => Có thể đọc: Dao xuất hiện → giữ độ rõ trong lúc cắt → mờ dần → biến mất
 */
 
-/* 
+/*
 ┌────────┐
 │   0%   │  Dao chuẩn bị
 └────────┘
-     ↓
+    ↓
 ┌────────┐
 │  15%   │  Dao lao xuống
 └────────┘
-     ↓
+    ↓
 ┌────────┐
 │  30%   │  Dao tiếp tục xuống
 └────────┘
-     ↓
+    ↓
 ┌────────┐
 │  48%   │  Dao cắt
 └────────┘
-     ↓
+    ↓
 ┌────────┐
 │  62%   │  Giữ nhịp cắt
 └────────┘
-     ↓
+    ↓
 ┌────────┐
 │  78%   │  Rút dao
 └────────┘
-     ↓
+    ↓
 ┌────────┐
 │  100%  │  Dao biến mất
-└────────┘ 
+└────────┘
 */
 
 /* 
@@ -487,7 +505,6 @@ Vậy timeline thật sự là:
   }
 
   /* Dao tiếp tục lao xuống, càng thẳng hơn */
-  /* 30% */
   30% {
     opacity: 1;
     transform: translate(138px, 40px) rotate(-22deg) scale(1.05);
@@ -504,6 +521,7 @@ Vậy timeline thật sự là:
     opacity: 1;
     transform: translate(120px, 138px) rotate(-12deg) scale(0.98);
   }
+
   /* Dao rút lên và sang phải, đồng thời nghiêng lại và bắt đầu mờ */
   /* Rotate: -48° -> -32° -> -22° ->-14° -> Ngày càng thẳng */
   /* -14° -> -12° -> -26° -> -38° -> Lại nghiêng dần */

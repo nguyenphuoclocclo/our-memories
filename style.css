@@ -625,6 +625,7 @@ body {
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.8);
+  /* Làm mờ những gì nằm phía sau element 10px. Nền phía sau modal vừa tối đi, vừa bị làm mờ → giúp modal nổi bật lên */
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   display: flex;
@@ -656,6 +657,7 @@ body {
 }
 
 .modal-overlay.active .modal-content {
+  /* Modal ban đầu nhỏ hơn bình thường + hơi lệch xuống → khi active thì phóng to về kích thước bình thường + di chuyển lên → tạo cảm giác modal bật lên màn hình */
   transform: scale(1) translateY(0);
 }
 
@@ -702,6 +704,7 @@ body {
 
 .toast-msg.show {
   opacity: 1;
+  /* translateX(-50%) Giúp nó luôn nằm giữa theo chiều ngang, còn translateY(50px) → translateY(0) tạo ra chuyển động từ dưới lên vị trí bình thường */
   transform: translateX(-50%) translateY(0);
 }
 

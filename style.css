@@ -556,11 +556,19 @@ Vậy timeline thật sự là:
   transition: opacity 0.5s ease;
 }
 
+/* slice-separated: Miếng bánh đã được tách rời */
 .cake-container.slice-separated .slice-piece {
+  /* Đẩy miếng bánh trượt lệch ra khỏi thân bánh chính (kèm xoay nhẹ 4° và đổ bóng 3D) */
   transform: translate(24px, 10px) rotate(4deg);
+  /*
+    - Tạo bóng đổ theo đúng đường viền hình dạng miếng bánh
+    - Bóng lệch sang bên phải 4px, lệch xuống dưới 8px (tạo cảm giác ánh sáng chiếu từ phía trên xuống), Độ nhòe mờ 15px (giúp bóng mềm mại, tự nhiên, không bị sắc cạnh), Màu đen với độ đậm 45% (vừa đủ rõ nét mà không bị quá tối)
+    - Khi miếng bánh trượt lệch ra, hiệu ứng đổ bóng này làm cho miếng bánh trông như được nhấc nổi lên khỏi mặt đĩa theo không gian 3D thật
+  */
   filter: drop-shadow(4px 8px 15px rgba(0, 0, 0, 0.45));
 }
 
+/* Làm lộ phần nhân kem và cốt bánh bên trong mặt cắt */
 .cake-container.slice-separated .slice-inner-wall,
 .cake-container.slice-separated .slice-inner-cream {
   opacity: 1;

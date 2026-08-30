@@ -463,14 +463,19 @@ body {
   animation: smokeRise 1.5s forwards ease-out;
 }
 
+/* Tạo một hạt khói hình tròn màu xám, kích thước nhỏ và hơi trong suốt. Khi animation bắt đầu, hạt khói xuất hiện tương đối rõ ở vị trí ban đầu. Trong 1.5 giây tiếp theo, nó từ từ bay lên 40px, đồng thời phình to từ 80% lên 250% kích thước ban đầu, độ trong suốt giảm dần về 0 và hình ảnh trở nên nhòe hơn. Khi animation kết thúc, hạt khói hoàn toàn biến mất nhưng vẫn giữ trạng thái cuối cùng nhờ forward */
+/* Hạt khói nhỏ xuất hiện → bay lên → phình ra → mờ/nhòe dần → tan biến */
 @keyframes smokeRise {
   0% {
     opacity: 0.8;
     transform: translateY(0) scale(0.8);
   }
   100% {
+    /* Hạt khói hoàn toàn trong suốt */
     opacity: 0;
+    /* Hai hiệu ứng transform chạy cùng lúc. Tạo chuyển động bay lên trên, khói phình to */
     transform: translateY(-40px) scale(2.5);
+    /* Hạt khói mờ nhòe về mặt hình ảnh */
     filter: blur(4px);
   }
 }

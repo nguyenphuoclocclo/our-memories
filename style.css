@@ -97,6 +97,7 @@ body {
 /* Glassmorphism Cards */
 .glass-card {
   background: var(--glass-bg);
+  /* Làm mờ (blur) tất cả các nội dung/hình ảnh nằm phía sau phần tử đó với bán kính làm mờ là 18px. Nội dung, văn bản bên trong phần tử vẫn giữ nguyên độ sắc nét */
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border: 1px solid var(--glass-border);
@@ -112,7 +113,11 @@ body {
   font-family: "Dancing Script", cursive;
   font-size: 2.8rem;
   background: linear-gradient(45deg, #ff758c, #ff7eb3, #ffb199);
+  /* Trình duyệt sẽ cắt (mask/clip) lớp nền chỉ hiển thị bên trong hình dạng các ký tự chữ cái. Phần nền nằm ngoài viền chữ sẽ bị ẩn hoàn toàn */
   -webkit-background-clip: text;
+  background-clip: text;
+  /* Theo mặc định, chữ có màu riêng (ví dụ màu đen #000000). Khi background-clip: text đã cắt dải màu nền theo hình dạng chữ, lớp màu chữ mặc định vẫn nằm đè lên phía trên, che mất dải gradient bên dưới */
+  /* Việc đặt -webkit-text-fill-color: transparent; (hoặc color: transparent;) sẽ làm chữ trở nên trong suốt, giúp lớp dải màu gradient ở dưới lộ ra rõ nét */
   -webkit-text-fill-color: transparent;
   margin-bottom: 5px;
 }

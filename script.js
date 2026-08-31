@@ -193,7 +193,7 @@ class FloatingOrb {
         this.element.className = 'floating-orb';
 
         // Chèn nội dung HTML vào trong quả cầu
-        this.element.innerHTML = `<div class="orb-inner">${data.icon} ${data.label}</div>`;
+        this.element.innerHTML = `<div class="orb-inner">${data.icon} <span>${data.label}</span></div>`;
 
         // Vị trí xuất phát ngẫu nhiên
         const padding = 60; // Lùi vào 60px từ các mép màn hình (để quả cầu không bị mép màn hình che mất)
@@ -513,7 +513,7 @@ let heartClickCount = 0;
 const secretHeartEl = document.getElementById('secretHeart');
 if (secretHeartEl) {
     // Khi người dùng nhấp 5 lần liên tiếp vào biểu tượng trái tim bí mật, ứng dụng sẽ tạo hiệu ứng bắn hạt pháo hoa hồng và mở một Modal chứa thông điệp đặc biệt
-    secretHeartEl.addEventListener('click', () => {
+    secretHeartEl.addEventListener('click', (e) => {
         // Nếu Modal đã được hiển thị rồi thì không thực thi nữa
         if (memoryModalEl && memoryModalEl.classList.contains('active')) return;
 
@@ -552,11 +552,51 @@ if (secretHeartEl) {
 // - true: Ngọn nến đã bị thổi tắt
 let candlesBlown = [false, false, false];
 
-// Cờ đánh dấu đã hoàn thành cắt bánh
+// Cờ đánh dấu trạng thái cắt bánh
 let isCakeCut = false;
+let isCakeCutting = false;
 
 // Cờ đánh dấu đã hoàn thành thổi nến
 let isAllCandlesBlown = false;
+
+// ==========================================
+// HIỆU ỨNG VỤN BÁNH (CAKE CRUMBS)
+// ==========================================
+function createCakeCrumbs(centerX, centerY) {
+    const cakeContainer = document.querySelector('.cake-container');
+    if (!cakeContainer) return;
+
+    const crumbColors = ['#6d3a29', '#844531', '#ff7eb3', '#ff4b8b', '#fff5f8', '#ffd700'];
+    const crumbCount = 16;
+
+    for (let i = 0; i < crumbCount; i++) {
+        const crumb = document.createElement('div');
+        crumb.className = 'cake-crumb';
+
+        const size = Math.random() * 5 + 3;
+        const color = crumbColors[Math.floor(Math.random() * crumbColors.length)];
+
+        crumb.style.width = `${size}px`;
+        crumb.style.height = `${size}px`;
+        crumb.style.backgroundColor = color;
+        crumb.style.left = `${centerX || 140}px`;
+        crumb.style.top = `${centerY || 130}px`;
+
+        const angle = Math.random() * Math.PI * 2;
+        const dist = Math.random() * 55 + 25;
+        const vx = Math.cos(angle) * dist;
+        const vy = Math.sin(angle) * dist + 20;
+
+        crumb.style.setProperty('--crumb-vx', `${vx}px`);
+        crumb.style.setProperty('--crumb-vy', `${vy}px`);
+
+        cakeContainer.appendChild(crumb);
+
+        setTimeout(() => {
+            crumb.remove();
+        }, 900);
+    }
+}
 
 const blowCandleSingle = withTryCatch(
     function blowCandleSingle(index) {
@@ -575,11 +615,11 @@ const blowCandleSingle = withTryCatch(
         // Ẩn/dập ngọn lửa
         if (flameItem) flameItem.classList.add('extinguished');
 
-        // Tọa độ tương ứng của 3 ngọn nến
+        // Tọa độ tương ứng của 3 ngọn nến trong SVG (viewBox 240x200)
         const candleCoords = [
-            { x: 65, y: 14 },
-            { x: 100, y: 8 },
-            { x: 135, y: 14 }
+            { x: 80, y: 18 },
+            { x: 120, y: 12 },
+            { x: 160, y: 18 }
         ];
 
         const targetCoord = candleCoords[index];
@@ -604,7 +644,9 @@ const blowCandlesAll = withTryCatch(
 );
 
 // - Kiểm tra xem tất cả các ngọn nến trên chiếc bánh sinh nhật đã được thổi tắt hết hay chưa
-// - Khi toàn bộ nến đã tắt, hàm sẽ tự động kích hoạt chuỗi hiệu ứng ăn mừng (thông báo lời chúc, bắn hiệu ứng pháo hoa/kim tuyến), khóa nút thổi nến để tránh bấm lại, và gửi tín hiệu kiểm tra xem người dùng đã đủ điều kiện mở khóa video kỷ niệm hay chưa
+// - Khi toàn bộ nến đã tắt:
+//   1. Ẩn nút "Thổi Nến & Ước Nào" mượt mà.
+//   2. Hiển thị nút "Cắt Bánh Kem" mượt mà.
 const checkAllCandlesBlown = withTryCatch(
     function checkAllCandlesBlown() {
         // Nếu đã hoàn thành thổi nến rồi thì không chạy lại (tránh trùng lặp hiệu ứng)
@@ -620,9 +662,19 @@ const checkAllCandlesBlown = withTryCatch(
             // Gọi hàm tạo hiệu ứng kim tuyến/pháo hoa nổ tung tóe đầy màu sắc rơi khắp màn hình để tạo cảm giác bất ngờ và phấn khích
             createConfetti?.();
 
+            // Ẩn nút thổi nến mượt mà và hiển thị nút cắt bánh kem
             if (btnBlowEl) {
-                btnBlowEl.innerText = "✨ Đã Thổi Nến & Ước";
-                btnBlowEl.disabled = true;
+                btnBlowEl.classList.add('btn-fade-out');
+                setTimeout(() => {
+                    btnBlowEl.style.display = 'none';
+                }, 400);
+            }
+
+            if (btnCutEl) {
+                setTimeout(() => {
+                    btnCutEl.style.display = 'flex';
+                    btnCutEl.classList.add('btn-pop-in');
+                }, 300);
             }
 
             checkUnlockVideo?.();
@@ -632,43 +684,71 @@ const checkAllCandlesBlown = withTryCatch(
 
 const cutCake = withTryCatch(
     function cutCake() {
-        // Nếu đã hoàn thành cắt bánh rồi thì không chạy lại (tránh trùng lặp hiệu ứng)
-        if (isCakeCut) return;
+        // Chống spam click hoặc chạy trùng khi đang thực hiện cắt bánh
+        if (isCakeCut || isCakeCutting) return;
 
-        isCakeCut = true;
+        isCakeCutting = true;
 
-        const cakeSvgEl = document.getElementById('cakeSvg')
-
-        if (cakeSvgEl) cakeSvgEl.classList.add('cake-sliced');
-
-        createBurstParticles?.(
-            window.innerWidth / 2,
-            window.innerHeight / 2,
-            40,
-            ['#ff7eb3', '#ffd700', '#ffffff', '#60a5fa', '#a7f3d0']
-        );
-
-        createConfetti?.();
-
-        showToast("🍰 Cắt bánh thành công! Chúc mừng sinh nhật tràn ngập niềm vui! 🎉");
-
+        const cakeContainer = document.querySelector('.cake-container');
         if (btnCutEl) {
-            btnCutEl.innerText = "🍰 Đã Cắt Bánh";
             btnCutEl.disabled = true;
+            btnCutEl.innerHTML = "🔪 Đang Cắt Bánh...";
         }
 
-        checkUnlockVideo?.();
+        // Bắt đầu hoạt ảnh con dao cắt bánh
+        if (cakeContainer) {
+            cakeContainer.classList.add('is-cutting');
+        }
+
+        // Thời điểm lưỡi dao chém ngọt qua thân bánh (khoảng 700ms)
+        setTimeout(() => {
+            if (cakeContainer) {
+                cakeContainer.classList.add('slice-separated');
+            }
+
+            // Tạo vụn bánh kem bay ra
+            const containerBox = cakeContainer ? cakeContainer.getBoundingClientRect() : null;
+            createCakeCrumbs(140, 130);
+
+            // Bắn hạt pháo hoa bừng sáng tại vị trí vết cắt
+            const burstX = containerBox ? (containerBox.left + containerBox.width * 0.6) : (window.innerWidth / 2);
+            const burstY = containerBox ? (containerBox.top + containerBox.height * 0.6) : (window.innerHeight / 2);
+
+            createBurstParticles?.(
+                burstX,
+                burstY,
+                35,
+                ['#ff7eb3', '#ffd700', '#ffffff', '#ff4b8b', '#a7f3d0']
+            );
+
+            createConfetti?.();
+        }, 750);
+
+        // Hoàn tất toàn bộ chuỗi cắt bánh (khoảng 1900ms khi dao rút ra)
+        setTimeout(() => {
+            isCakeCut = true;
+            isCakeCutting = false;
+
+            showToast("🍰 Cắt bánh thành công! Chúc mừng sinh nhật tràn ngập niềm vui! 🎉");
+
+            if (btnCutEl) {
+                btnCutEl.innerHTML = "🍰 Đã Cắt Bánh Xong ✨";
+                btnCutEl.disabled = true;
+            }
+
+            checkUnlockVideo?.();
+        }, 1900);
     }
 );
 
 const checkUnlockVideo = withTryCatch(
     function checkUnlockVideo() {
-        // Đảm bảo người dùng đã thổi tắt tất cả 3 ngọn nến sinh nhật và đã nhấn cắt bánh sinh nhật
+        // Đảm bảo người dùng đã thổi tắt tất cả 3 ngọn nến sinh nhật và đã cắt bánh sinh nhật
         if (isAllCandlesBlown && isCakeCut) {
             const btnGoVideo = document.getElementById('btnGoVideo');
             if (btnGoVideo) {
                 btnGoVideo.style.display = 'flex';
-                btnGoVideo.classList.add('pulse');
+                btnGoVideo.classList.add('pulse', 'btn-pop-in');
             }
         }
     }
@@ -685,26 +765,25 @@ const createSmokePuff = withTryCatch(
 
         if (typeof svgX !== 'number' || typeof svgY !== 'number' || Number.isNaN(svgX) || Number.isNaN(svgY)) return;
 
-        // Ngọn nến có tọa độ (svgX, svgY) nằm trong khung vẽ đồ họa SVG có kích thước cố định là 200 x 180. Nhưng hạt khói lại là một thẻ HTML được dán trực tiếp lên toàn bộ màn hình
+        // Ngọn nến có tọa độ (svgX, svgY) nằm trong khung vẽ đồ họa SVG có kích thước cố định là 240 x 200. Nhưng hạt khói lại là một thẻ HTML được dán trực tiếp lên toàn bộ màn hình
 
         // Cách tính quy đổi (posX) (Áp dụng tương tự cho posY)
-        // - 1) (svgX / 200): Tính xem ngọn nến chiếm bao nhiêu % chiều rộng của khung SVG
+        // - 1) (svgX / 240): Tính xem ngọn nến chiếm bao nhiêu % chiều rộng của khung SVG
         // - 2) * cakeBox.width: Nhân % đó với chiều rộng thực tế của chiếc bánh trên màn hình
         // - 3) + cakeBox.left: Cộng thêm khoảng cách từ mép trái màn hình đến chiếc bánh
 
         // Ví dụ dễ hiểu: Giả sử chiếc bánh SVG có chiều rộng cố định là 200. Ngọn nến nằm ở vị trí svgX = 100 (đúng chính giữa chiếc bánh). Khi hiển thị trên điện thoại, chiếc bánh phóng to ra rộng 400px và nằm cách mép trái màn hình 20px:
-        // - Tỷ lệ: 100 / 200 = 0.5 (nằm ở 50% chiếc bánh).
+        // - Tỷ lệ: 100 / 240 = 0.5 (nằm ở 50% chiếc bánh).
         // - Vị trí ngọn nến trên điện thoại: 20 + (0.5 * 400) = 220px
-        const posX = cakeBox.left + (svgX / 200) * cakeBox.width;
-        const posY = cakeBox.top + (svgY / 180) * cakeBox.height;
+        const posX = cakeBox.left + (svgX / 240) * cakeBox.width;
+        const posY = cakeBox.top + (svgY / 200) * cakeBox.height;
 
         for (let i = 0; i < 4; i++) {
             const smoke = document.createElement('div');
             smoke.className = 'smoke';
 
-            // Giúp 4 hạt khói không bị chồng khít lên nhau tại 1 điểm duy nhất, mà bị lệch nhẹ sang trái/phải ngẫu nhiên xung quanh ngọn nến
+            // Giúp các hạt khói bay tản ra tự nhiên
             smoke.style.left = (posX + (Math.random() - 0.5) * 15) + 'px';
-
             smoke.style.top = posY + 'px';
             document.body.appendChild(smoke);
 
@@ -864,7 +943,7 @@ class Particle {
         // Kiểu dáng: 'circle', 'ribbon', 'rect'
         this.shape = shape;
 
-        if (this.shappe === "ribbon" && this.shape === "rect") {
+        if (this.shape === 'ribbon' || this.shape === 'rect') {
             // Kích thước dải ribbon / chữ nhật
             this.width = Math.random() * 8 + 4;
             this.height = Math.random() * 12 + 6;
@@ -876,7 +955,7 @@ class Particle {
 
 
         // Góc xoay và tốc độ xoay (tạo hiệu ứng ribbon chao đảo khi rơi)
-        // Các hạt pháo hoa / dải ribbon / hạt hoa giấy không bị cùng đứng thẳng theo 1 trục mà mỗi mảnh sẽ nghiêng ngả ở một góc tự do khác nha
+        // Các hạt pháo hoa / dải ribbon / hạt hoa giấy không bị cùng đứng thẳng theo 1 trục mà mỗi mảnh sẽ nghiêng ngả ở một góc tự do khác nhau
         this.rotation = Math.random() * Math.PI * 2;
 
         // - Nếu âm (< 0): Hạt tự xoay ngược chiều kim đồng hồ
@@ -1103,7 +1182,7 @@ const stopParticles = withTryCatch(
 const starsContainer = document.getElementById('stars-container');
 if (starsContainer) {
     // Đoạn code này tạo hiệu ứng "Nền vũ trụ sao lấp lánh"
-    for (let i = 0; i < 45; i++) {
+    for (let i = 0; i < 65; i++) {
         const star = document.createElement('div');
         star.classList.add('star');
 

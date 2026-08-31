@@ -129,6 +129,8 @@ body {
   transition: transform 0.3s ease;
   user-select: none;
   animation: beat 1.5s infinite ease-in-out;
+  /* Tạo hiệu ứng bóng đổ ôm sát viền thực của icon trái tim (bỏ qua khoảng trong suốt, khác với box-shadow bị đóng khung chữ nhật) */
+  /* Tọa độ x=0 y=0 kết hợp độ mờ 15px giúp màu --accent-glow tỏa đều ra 4 phía, tạo thành vầng sáng phát quang (glow) quanh trái tim */
   filter: drop-shadow(0 0 15px var(--accent-glow));
 }
 

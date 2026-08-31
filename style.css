@@ -594,7 +594,9 @@ Vậy timeline thật sự là:
 
 /* Cut Glistening Seam Line */
 .cut-seam-line {
+  /* Định nghĩa chiều dài nét đứt cho đường kẻ SVG. Ở đây gán nét vẽ dài 90px và khoảng trống 90px. (Đoạn thẳng <line> có tọa độ từ y1=80 đến y2=162, độ dài thực tế là 82px nên 90px bao phủ trọn vẹn chiều dài đường cắt) */
   stroke-dasharray: 90;
+  /* Đẩy điểm bắt đầu của nét vẽ lệch đi 90px. Kết hợp với stroke-dasharray, toàn bộ phần nét vẽ bị trượt ra ngoài vùng hiển thị, thay vào đó là khoảng trống -> Đường kẻ biến mất hoàn toàn (kỹ thuật kinh điển để chuẩn bị hiệu ứng vẽ nét SVG) */
   stroke-dashoffset: 90;
   transition: opacity 0.4s ease;
 }
@@ -640,6 +642,7 @@ Vậy timeline thật sự là:
 
   /* Thời gian: 1.5s */
   /* Trạng thái nét cắt: Giữ nguyên */
+  /* Hiệu ứng Glow: Tắt */
   /* Trải nghiệm thị giác: Rãnh phân chia lát bánh */
   /* Ý nghĩa: Ánh sáng phát quang tắt hẳn */
   100% {

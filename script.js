@@ -703,14 +703,17 @@ const cutCake = withTryCatch(
         // Thời điểm lưỡi dao chém ngọt qua thân bánh (khoảng 700ms)
         setTimeout(() => {
             if (cakeContainer) {
+                // Đẩy một lát bánh tách rời ra khỏi chiếc bánh chính
                 cakeContainer.classList.add('slice-separated');
             }
 
             // Tạo vụn bánh kem bay ra
+            // Lấy vị trí chính xác của chiếc bánh trên màn hình
             const containerBox = cakeContainer ? cakeContainer.getBoundingClientRect() : null;
             createCakeCrumbs(140, 130);
 
             // Bắn hạt pháo hoa bừng sáng tại vị trí vết cắt
+            // Điểm cắt nằm ở khoảng 60% chiều ngang và 60% chiều dọc của bánh. Nếu không tìm thấy bánh, fallback về chính giữa màn hình (innerWidth / 2, innerHeight / 2)
             const burstX = containerBox ? (containerBox.left + containerBox.width * 0.6) : (window.innerWidth / 2);
             const burstY = containerBox ? (containerBox.top + containerBox.height * 0.6) : (window.innerHeight / 2);
 
@@ -732,8 +735,11 @@ const cutCake = withTryCatch(
             showToast("🍰 Cắt bánh thành công! Chúc mừng sinh nhật tràn ngập niềm vui! 🎉");
 
             if (btnCutEl) {
-                btnCutEl.innerHTML = "🍰 Đã Cắt Bánh Xong ✨";
-                btnCutEl.disabled = true;
+                btnCutEl.classList.remove('btn-pop-in');
+                btnCutEl.classList.add('btn-fade-out');
+                setTimeout(() => {
+                    btnCutEl.style.display = 'none';
+                }, 400);
             }
 
             checkUnlockVideo?.();
@@ -782,7 +788,7 @@ const createSmokePuff = withTryCatch(
             const smoke = document.createElement('div');
             smoke.className = 'smoke';
 
-            // Giúp các hạt khói bay tản ra tự nhiên
+            // Giúp các hạt khói bay tản ra tự nhiên không bị chồng khít lên nhau tại 1 điểm duy nhất, mà bị lệch nhẹ sang trái/phải ngẫu nhiên xung quanh ngọn nến
             smoke.style.left = (posX + (Math.random() - 0.5) * 15) + 'px';
             smoke.style.top = posY + 'px';
             document.body.appendChild(smoke);
@@ -1195,7 +1201,7 @@ if (starsContainer) {
         // Đặt vị trí của ngôi sao theo trục dọc (Y), rải đều ngẫu nhiên từ đỉnh trên cùng xuống đáy dưới cùng
         star.style.top = Math.random() * 100 + '%';
 
-        // Giúp các ngôi sao nhấp nháy lệch pha nhau (sao mờ nhanh, sao mờ chậm), tránh hiện tượng tất cả 45 ngôi sao cùng sáng/tối đồng loạt nhìn rất đơ
+        // Giúp các ngôi sao nhấp nháy lệch pha nhau (sao mờ nhanh, sao mờ chậm), tránh hiện tượng tất cả 65 ngôi sao cùng sáng/tối đồng loạt nhìn rất đơ
         star.style.animationDuration = (Math.random() * 3 + 2) + 's';
 
         starsContainer.appendChild(star);

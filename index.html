@@ -14,7 +14,9 @@
 <body>
 
     <!-- Background Stars & Particles -->
+    <!-- Dùng để chứa các đốm sao lấp lánh (vũ trụ) tĩnh trên bầu trời đêm -->
     <div id="stars-container"></div>
+    <!-- Dùng để vẽ các hiệu ứng động như pháo hoa, hoa giấy (confetti), dải ribbon, tia sáng nổ tung khi bạn bấm nút thả tim, chuyển stage, thổi nến... -->
     <canvas id="particle-canvas"></canvas>
 
     <!-- Floating Orbs Container (Global Layer) -->
@@ -331,6 +333,7 @@
                 <video id="memoryVideo" controls playsinline
                     poster="https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=1000&q=80">
                     <source src="video.mp4" type="video/mp4">
+                    <!-- fallback text của thẻ <video>. Nó chỉ hiển thị khi trình duyệt không hỗ trợ thẻ <video> -->
                     Trình duyệt của bạn không hỗ trợ phát video HTML5.
                 </video>
             </div>

@@ -38,9 +38,11 @@ body {
   height: 100%;
   pointer-events: none;
 }
+
 #stars-container {
   z-index: 0;
 }
+
 #particle-canvas {
   z-index: 90;
 }

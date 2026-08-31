@@ -316,10 +316,12 @@ body {
 }
 
 /* Cake Knife Animation */
+/* Chuẩn bị sẵn góc đặt, tâm xoay, bóng đổ và ẩn con dao đi để chờ kích hoạt animation cắt bánh */
 .cake-knife {
   opacity: 0;
   transform: translate(190px, -60px) rotate(-45deg);
   pointer-events: none;
+  /* Đặt tâm xoay tại tọa độ (x: 0px, y: 8px) (thường là mũi dao hoặc chuôi dao) để chuyển động chém/cắt trông tự nhiên */
   transform-origin: 0px 8px;
   filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.35));
 }
@@ -602,19 +604,44 @@ Vậy timeline thật sự là:
   animation: cutGleam 1.5s ease-out forwards;
 }
 
+/* Mô phỏng khoảnh khắc con dao vừa rạch một đường qua chiếc bánh */
+/* Khi offset = 90: Đẩy vạch 90px trượt ra ngoài khung nhìn -> Đường nét hoàn toàn biến mất (ẩn) */
+/* Khi offset = 0: Kéo vạch 90px về đúng vị trí -> Đường nét hiện ra trọn vẹn */
+/* Chuyển động từ 90 -> 0 tạo cảm giác con dao đang rạch một đường từ điểm A tới điểm B */
 @keyframes cutGleam {
+  /* Thời gian: 0.0s */
+  /* Trạng thái nét cắt: Ẩn */
+  /* Trải nghiệm thị giác: Chuẩn bị chém */
+  /* Ý nghĩa: Dao bắt đầu vung xuống, vết cắt chưa xuất hiện */
   0% {
     opacity: 0;
     stroke-dashoffset: 90;
   }
+
+  /* Thời gian: 0.6s */
+  /* Trạng thái nét cắt: Vẽ xong */
+  /* Hiệu ứng Glow: Trắng + Hồng rực rỡ */
+  /* Trải nghiệm thị giác: Tia laser rạch ngang */
+  /* Ý nghĩa: Dao vừa rạch xong toàn bộ đường cắt. Đây là khoảnh khắc cao trào nhất (climax) */
   40% {
     opacity: 1;
     stroke-dashoffset: 0;
     filter: drop-shadow(0 0 6px #ffffff) drop-shadow(0 0 12px #ff7eb3);
   }
+
+  /* Thời gian: 1.125s */
+  /* Trạng thái nét cắt: Giữ nguyên */
+  /* Hiệu ứng Glow: Lắng dần */
+  /* Trải nghiệm thị giác: Lấp lánh còn đọng lại */
+  /* Ý nghĩa: Giữ ánh sáng lấp lánh nán lại mắt người xem thêm một chút (từ 0.6s đến 1.125s ánh sáng chỉ giảm nhẹ từ 1 xuống 0.9), giúp cảm giác cắt bánh rất "mãn nhãn" thay vì tắt quá nhanh */
   75% {
     opacity: 0.9;
   }
+
+  /* Thời gian: 1.5s */
+  /* Trạng thái nét cắt: Giữ nguyên */
+  /* Trải nghiệm thị giác: Rãnh phân chia lát bánh */
+  /* Ý nghĩa: Ánh sáng phát quang tắt hẳn */
   100% {
     opacity: 0.4;
     stroke-dashoffset: 0;

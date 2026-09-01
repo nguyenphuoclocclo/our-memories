@@ -9,6 +9,7 @@ const modalImgEl = document.getElementById('modalImg');
 const modalTextEl = document.getElementById('modalText');
 const btnBlowEl = document.getElementById('btnBlow');
 const btnCutEl = document.getElementById('btnCut');
+const cakeContainer = document.querySelector('.cake-container');
 
 const daysEl = document.getElementById('days');
 const hoursEl = document.getElementById('hours');
@@ -562,34 +563,48 @@ let isAllCandlesBlown = false;
 // ==========================================
 // HIỆU ỨNG VỤN BÁNH (CAKE CRUMBS)
 // ==========================================
+// Tạo ra các mẩu vụn bánh kem nhỏ li ti văng tung tóe và rơi xuống (giống như khi ta dùng dao ấn mạnh cắt qua thân bánh kem thì vụn bánh và kem bắn ra xung quanh)
 function createCakeCrumbs(centerX, centerY) {
-    const cakeContainer = document.querySelector('.cake-container');
     if (!cakeContainer) return;
 
+    if (typeof svgX !== 'number' || typeof svgY !== 'number' || Number.isNaN(svgX) || Number.isNaN(svgY)) return;
+
     const crumbColors = ['#6d3a29', '#844531', '#ff7eb3', '#ff4b8b', '#fff5f8', '#ffd700'];
-    const crumbCount = 16;
+    const crumbCount = 36;
 
     for (let i = 0; i < crumbCount; i++) {
         const crumb = document.createElement('div');
         crumb.className = 'cake-crumb';
 
-        const size = Math.random() * 5 + 3;
+        // Kích thước ngẫu nhiên của các vụn bánh từ 5px đến 10px 
+        const size = Math.random() * 5 + 5;
         const color = crumbColors[Math.floor(Math.random() * crumbColors.length)];
 
+        // Thiết lập kích thước và màu sắc cho mẩu vụn
         crumb.style.width = `${size}px`;
         crumb.style.height = `${size}px`;
         crumb.style.backgroundColor = color;
+
+        // Đặt vị trí xuất phát ban đầu của vụn bánh (mặc định là tâm bánh: X=140px, Y=130px)
         crumb.style.left = `${centerX || 140}px`;
         crumb.style.top = `${centerY || 130}px`;
 
+        // Chọn 1 góc ngẫu nhiên trong đường tròn 360 độ (0 đến 2π radian)
         const angle = Math.random() * Math.PI * 2;
+
+        // Khoảng cách văng xa ngẫu nhiên từ 25px đến 80px
         const dist = Math.random() * 55 + 25;
+
+        // Tính độ dịch chuyển ngang (vx) và dọc (vy) dựa trên lượng giác (Sin & Cos)
         const vx = Math.cos(angle) * dist;
+        // +20px vào vy để mô phỏng trọng lực (hạt bị kéo rơi xuống dưới nhiều hơn bay lên)
         const vy = Math.sin(angle) * dist + 20;
 
+        // Truyền giá trị vx, vy vào biến CSS Custom Properties (--crumb-vx, --crumb-vy)
         crumb.style.setProperty('--crumb-vx', `${vx}px`);
         crumb.style.setProperty('--crumb-vy', `${vy}px`);
 
+        // Gắn hạt vào trong khung bánh
         cakeContainer.appendChild(crumb);
 
         setTimeout(() => {
@@ -644,9 +659,6 @@ const blowCandlesAll = withTryCatch(
 );
 
 // - Kiểm tra xem tất cả các ngọn nến trên chiếc bánh sinh nhật đã được thổi tắt hết hay chưa
-// - Khi toàn bộ nến đã tắt:
-//   1. Ẩn nút "Thổi Nến & Ước Nào" mượt mà.
-//   2. Hiển thị nút "Cắt Bánh Kem" mượt mà.
 const checkAllCandlesBlown = withTryCatch(
     function checkAllCandlesBlown() {
         // Nếu đã hoàn thành thổi nến rồi thì không chạy lại (tránh trùng lặp hiệu ứng)
@@ -689,7 +701,6 @@ const cutCake = withTryCatch(
 
         isCakeCutting = true;
 
-        const cakeContainer = document.querySelector('.cake-container');
         if (btnCutEl) {
             btnCutEl.disabled = true;
             btnCutEl.innerHTML = "🔪 Đang Cắt Bánh...";
@@ -763,7 +774,6 @@ const checkUnlockVideo = withTryCatch(
 const createSmokePuff = withTryCatch(
     // Hàm này dùng để tạo hiệu ứng các làn khói mờ bốc lên tại vị trí đầu ngọn nến khi nến trên chiếc bánh sinh nhật bị thổi tắt
     function createSmokePuff(svgX, svgY) {
-        const cakeContainer = document.querySelector('.cake-container');
         if (!cakeContainer) return;
 
         const cakeBox = cakeContainer.getBoundingClientRect();

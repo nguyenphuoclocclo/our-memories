@@ -663,10 +663,13 @@ Vậy timeline thật sự là:
 @keyframes crumbFly {
   0% {
     opacity: 1;
+    /* Lúc mới sinh ra: hiện rõ 100%, kích thước đầy đủ */
     transform: translate(0, 0) scale(1);
   }
   100% {
+    /* Mờ dần và biến mất */
     opacity: 0;
+    /* Bay đến tọa độ vx, vy và co nhỏ lại còn 30% */
     transform: translate(var(--crumb-vx, 20px), var(--crumb-vy, 30px))
       scale(0.3);
   }

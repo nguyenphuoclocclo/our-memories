@@ -567,7 +567,7 @@ let isAllCandlesBlown = false;
 function createCakeCrumbs(centerX, centerY) {
     if (!cakeContainer) return;
 
-    if (typeof svgX !== 'number' || typeof svgY !== 'number' || Number.isNaN(svgX) || Number.isNaN(svgY)) return;
+    if (typeof centerX !== 'number' || typeof centerY !== 'number' || Number.isNaN(centerX) || Number.isNaN(centerY)) return;
 
     const crumbColors = ['#6d3a29', '#844531', '#ff7eb3', '#ff4b8b', '#fff5f8', '#ffd700'];
     const crumbCount = 36;
@@ -576,7 +576,7 @@ function createCakeCrumbs(centerX, centerY) {
         const crumb = document.createElement('div');
         crumb.className = 'cake-crumb';
 
-        // Kích thước ngẫu nhiên của các vụn bánh từ 5px đến 10px 
+        // Kích thước ngẫu nhiên của các vụn bánh từ 5px đến 10px
         const size = Math.random() * 5 + 5;
         const color = crumbColors[Math.floor(Math.random() * crumbColors.length)];
 

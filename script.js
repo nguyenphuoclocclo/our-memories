@@ -766,6 +766,41 @@ const checkUnlockVideo = withTryCatch(
     }
 );
 
+// Khôi phục Stage 2 về trạng thái ban đầu để người dùng có thể bắt đầu lại toàn bộ trải nghiệm.
+function resetCakeStage() {
+    candlesBlown = [false, false, false];
+    isAllCandlesBlown = false;
+    isCakeCut = false;
+    isCakeCutting = false;
+
+    document.querySelectorAll('.flame.extinguished').forEach(flame => {
+        flame.classList.remove('extinguished');
+    });
+
+    if (cakeContainer) {
+        cakeContainer.classList.remove('is-cutting', 'slice-separated');
+        cakeContainer.querySelectorAll('.cake-crumb').forEach(crumb => crumb.remove());
+    }
+
+    if (btnBlowEl) {
+        btnBlowEl.style.display = 'flex';
+        btnBlowEl.classList.remove('btn-fade-out', 'btn-pop-in');
+    }
+
+    if (btnCutEl) {
+        btnCutEl.style.display = 'none';
+        btnCutEl.disabled = false;
+        btnCutEl.innerHTML = '🎂🔪 Cắt Bánh Kem';
+        btnCutEl.classList.remove('btn-fade-out', 'btn-pop-in');
+    }
+
+    const btnGoVideo = document.getElementById('btnGoVideo');
+    if (btnGoVideo) {
+        btnGoVideo.style.display = 'none';
+        btnGoVideo.classList.remove('pulse', 'btn-pop-in');
+    }
+}
+
 const createSmokePuff = withTryCatch(
     // Hàm này dùng để tạo hiệu ứng các làn khói mờ bốc lên tại vị trí đầu ngọn nến khi nến trên chiếc bánh sinh nhật bị thổi tắt
     function createSmokePuff(svgX, svgY) {
@@ -841,6 +876,10 @@ const goToStage = withTryCatch(
             createConfetti?.();
         } else {
             if (video) video.pause();
+
+            if (stageNum === 1) {
+                resetCakeStage();
+            }
 
             if (
                 stageNum === 1 &&

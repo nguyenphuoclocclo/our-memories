@@ -413,16 +413,11 @@ const animateOrbs = withTryCatch(
 // Hàm này là cập nhật con số và thanh phần trăm tiến độ thu thập ký ức hiển thị trên giao diện người dùng (UI)
 const updateTrackerUI = withTryCatch(
     function updateTrackerUI() {
-        const collectedCountEl = document.getElementById('collectedCount');
-        const totalCountEl = document.getElementById('totalCount');
         const progressFillEl = document.getElementById('progressFill');
 
         const total = (Array.isArray(memoriesData) && memoriesData.length > 0) ? memoriesData.length : 0;
 
         const safeCollected = Math.max(0, Number(collectedCount) || 0);
-
-        if (collectedCountEl) collectedCountEl.innerText = safeCollected;
-        if (totalCountEl) totalCountEl.innerText = total;
 
         let pct = 0;
         if (total > 0) {

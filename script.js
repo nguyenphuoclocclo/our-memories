@@ -1,7 +1,7 @@
 // ==========================================
 // 1. CẤU HÌNH THỜI GIAN BẮT ĐẦU YÊU
 // ==========================================
-const startDate = new Date(2023, 1, 14, 0, 0, 0);
+const startDate = new Date(2026, 2, 2, 0, 0, 0);
 
 const memoryModalEl = document.getElementById('memoryModal');
 const modalTitleEl = document.getElementById('modalTitle');

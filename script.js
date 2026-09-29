@@ -170,7 +170,15 @@ const memoriesData = [
         icon: "💌",
         label: "2 tháng yêu xa",
         img: "./images/5.jpg",
-        text: "Chuyên gia hứa '10 phút nữa ngủ/xong', nhưng thực tế là 2 tiếng sau vẫn thấy sáng đèn online! Đã bị phát hiện nhé!"
+        text: "Cãi nhau banh chành, khóc nhiều, vui nhiều nhưng mà hiểu nhau nhiều hơn, i know you more"
+    },
+    {
+        id: 5,
+        title: "anh nấu cho em mấy món gòiii 🍕",
+        icon: "🍕",
+        label: "anh nấu cho em mấy món gòiii",
+        img: "./images/6.jpg",
+        text: "đố biết đó, để xem có nhớ hemmmm "
     }
 ];
 

@@ -134,42 +134,42 @@ updateTimer();
 const memoriesData = [
     {
         id: 0,
-        title: "Lần Đầu Gặp Mặt 🌸",
-        icon: "✨",
-        label: "Lần đầu gặp mặt",
-        img: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=600&q=80",
-        text: "Hôm đó trời mưa nhẹ, ai đó mặc áo màu xám bước vào. Ấn tượng đầu tiên là: 'Ủa sao nhìn lạnh lùng dữ vậy?', ai ngờ đâu sau này bám người ta dữ lắm!"
+        title: "First Date 💕",
+        icon: "💕",
+        label: "First Date",
+        img: "./images/1.jpg",
+        text: "Trời mưa, em mặc áo khoác lông, khăn choàng, mang khăn tay, nước ấm cho anh, anh mặc đồ đẹp trai, khăn choàng lun, mình ngồi công viên ngắm lagoon, first nắm tay, first hug ehheheh"
     },
     {
         id: 1,
-        title: "Món Ăn Cãi Nhau Nhiều Nhất 🍜",
-        icon: "🍕",
-        label: "Món ăn cãi nhau nhiều nhất",
-        img: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=600&q=80",
-        text: "Hỏi 'Hôm nay ăn gì?' luôn là câu hỏi hóc búa nhất thế giới. Kết quả 90% lần nào cũng chốt bằng... Bún Đậu / Mì Cay!"
+        title: "First Valentine 💘",
+        icon: "💘",
+        label: "First Valentine",
+        img: "./images/2.jpg",
+        text: "Em thức muộn làm bánh cho anh, call a làm bài, em tặng anh một bức thư, cookie jar with lots of note and a playlist with a secret haha, easy, anh ngố tặng em một lá thư đầu tiên, một thỏi son lần đầu mua và một hộp socolaaa, lén tặng quà nhau dưới nhà hahaha"
     },
     {
         id: 2,
-        title: "Chuyến Đi Đáng Nhớ 🌄",
-        icon: "🌙",
-        label: "Chuyến đi đáng nhớ",
-        img: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600&q=80",
-        text: "Lần đầu tiên cùng nhau đi xa, lạc đường giữa đêm nhưng lại nhìn thấy bầu trời ngàn sao đẹp nhất từ trước đến nay."
+        title: "Our Love Album 📸",
+        icon: "📸",
+        label: "Our Love Album",
+        img: "./images/3.jpg",
+        text: "The Art of Loving. you found the first song and the whole album just flow along"
     },
     {
         id: 3,
-        title: "Bài Hát Của Chúng Mình 🎧",
-        icon: "🎶",
-        label: "Bài hát của 2 đứa",
-        img: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&q=80",
-        text: "Mỗi khi giai điệu này vang lên, tự nhiên bao nhiêu mệt mỏi đều tan biến hết. Vì đó là bài hát chỉ cần nghe là nhớ tới người kia."
+        title: "First trip 🚲",
+        icon: "🚲",
+        label: "First trip",
+        img: "./images/4.jpg",
+        text: "Vienna, Budapest. you plan for vienna, i plan for budapest, lots of memories. *anh post hình nhaaaaaaaaaa"
     },
     {
         id: 4,
-        title: "Thói Quen Bị Phát Hiện 🤫",
-        icon: "🙈",
-        label: "Thói quen xấu bị bóc phốt",
-        img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&q=80",
+        title: "2 tháng yêu xa 💌",
+        icon: "💌",
+        label: "2 tháng yêu xa",
+        img: "./images/5.jpg",
         text: "Chuyên gia hứa '10 phút nữa ngủ/xong', nhưng thực tế là 2 tiếng sau vẫn thấy sáng đèn online! Đã bị phát hiện nhé!"
     }
 ];
